@@ -6,6 +6,7 @@ import android.media.MediaFormat;
 import android.util.Log;
 import android.view.Surface;
 import android.view.TextureView;
+import android.widget.FrameLayout;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;

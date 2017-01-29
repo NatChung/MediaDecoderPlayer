@@ -45,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
 //        displayHeight = displayMetrics.heightPixels;
 
         zoomableTextureLayout = (ZoomableTextureLayout)findViewById(R.id.video_view);
-        player = new DemoPlayer(zoomableTextureLayout.zoomableTextureView);
+        player = new DemoPlayer(this, zoomableTextureLayout.zoomableTextureView);
 
         MainActivity.verifyStoragePermissions(this);
     }
