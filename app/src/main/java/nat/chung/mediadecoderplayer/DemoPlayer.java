@@ -4,7 +4,6 @@ import android.media.MediaFormat;
 import android.view.TextureView;
 import java.io.IOException;
 
-import nat.chung.mediadecoderplayer.decorator.DecodePlayer;
 import nat.chung.mediadecoderplayer.decorator.SnapshotDecorator;
 
 /**

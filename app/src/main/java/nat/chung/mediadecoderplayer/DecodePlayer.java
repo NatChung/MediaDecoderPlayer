@@ -1,4 +1,4 @@
-package nat.chung.mediadecoderplayer.decorator;
+package nat.chung.mediadecoderplayer;
 
 import android.graphics.SurfaceTexture;
 import android.media.MediaCodec;
@@ -140,6 +140,7 @@ public class DecodePlayer implements IPlayer, TextureView.SurfaceTextureListener
             return;
 
         synchronized(this){
+            decoder.flush();
             decoder.stop();
             decoder.release();
             decoder = null;
