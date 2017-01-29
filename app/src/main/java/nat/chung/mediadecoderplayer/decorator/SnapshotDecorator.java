@@ -22,8 +22,8 @@ public class SnapshotDecorator extends PlayerDecorator {
     public void snapshot(String pathname){
 
         try {
-            FileOutputStream out = new FileOutputStream(new File(pathname));
-            super.getTextureView().getBitmap().compress(Bitmap.CompressFormat.JPEG, 90, out);
+            FileOutputStream out = new FileOutputStream(new File ("/sdcard", "haha3.jpg"));
+            super.getTextureView().getBitmap().compress(Bitmap.CompressFormat.PNG, 90, out);
             out.flush();
             out.close();
         } catch (Exception e) {

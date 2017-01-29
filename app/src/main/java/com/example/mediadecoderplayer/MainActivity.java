@@ -1,9 +1,13 @@
 package com.example.mediadecoderplayer;
 
+import android.Manifest;
+import android.app.Activity;
+import android.content.pm.PackageManager;
 import android.content.res.AssetFileDescriptor;
 import android.graphics.SurfaceTexture;
 import android.media.MediaExtractor;
 import android.media.MediaFormat;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
@@ -42,6 +46,8 @@ public class MainActivity extends AppCompatActivity {
 
         zoomableTextureLayout = (ZoomableTextureLayout)findViewById(R.id.video_view);
         player = new DemoPlayer(zoomableTextureLayout.zoomableTextureView);
+
+        MainActivity.verifyStoragePermissions(this);
     }
 
 
@@ -65,6 +71,11 @@ public class MainActivity extends AppCompatActivity {
     public void onStopClicked(@SuppressWarnings("unused") View unused){
         endOfExtraFile = true;
     }
+
+    public void onSnapshotClicked(@SuppressWarnings("unused") View unused){
+        player.snapshot("/sdcard/out.png");
+    }
+
 
     private void extraMP4File() throws IOException {
 
@@ -102,6 +113,20 @@ public class MainActivity extends AppCompatActivity {
         endOfExtraFile = true;
         player.stop();
         mediaExtractor.release();
+    }
+
+
+    private static final int REQUEST_EXTERNAL_STORAGE = 1;
+    private static String[] PERMISSIONS_STORAGE = {
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE
+    };
+
+    public static void verifyStoragePermissions(Activity activity) {
+        int permission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        if (permission != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(activity, PERMISSIONS_STORAGE, REQUEST_EXTERNAL_STORAGE);
+        }
     }
 
 

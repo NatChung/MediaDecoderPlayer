@@ -29,4 +29,8 @@ public class DemoPlayer {
     public void addVideoFrame(byte[] data, long timestamp){
         player.addVideoFrame(data, timestamp);
     }
+
+    public void snapshot(String savedPath){
+        player.snapshot(savedPath);
+    }
 }

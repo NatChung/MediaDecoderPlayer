@@ -17,6 +17,7 @@
         android:layout_height="200dp"/>
 
     <Button
+        android:id="@+id/play_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:onClick="onPlayClicked"
@@ -25,11 +26,21 @@
         android:text="PLAY" />
 
     <Button
+        android:id="@+id/stop_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:onClick="onStopClicked"
+        android:text="STOP"
         android:layout_alignParentBottom="true"
-        android:layout_alignParentEnd="true"
-        android:text="STOP" />
+        android:layout_alignParentEnd="true" />
+
+    <Button
+        android:id="@+id/snapshot_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="onSnapshotClicked"
+        android:text="SNAPSHOT"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true" />
 
 </RelativeLayout>

@@ -47,7 +47,6 @@ public class DecodePlayer implements IPlayer, TextureView.SurfaceTextureListener
 
         synchronized(this){
             int inputBufferIndex = decoder.dequeueInputBuffer(timeoutUs);
-            Log.i(TAG,"inputBufferIndex:"+inputBufferIndex);
             if (inputBufferIndex >= 0) {
                 ByteBuffer buf[] = decoder.getInputBuffers();
                 buf[inputBufferIndex].put(data);
