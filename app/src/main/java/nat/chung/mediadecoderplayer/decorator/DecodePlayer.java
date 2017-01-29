@@ -1,4 +1,4 @@
-package nat.chung.mediadecoderplayer;
+package nat.chung.mediadecoderplayer.decorator;
 
 import android.graphics.SurfaceTexture;
 import android.media.MediaCodec;
@@ -10,6 +10,8 @@ import android.view.TextureView;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.concurrent.locks.Lock;
+
+import nat.chung.mediadecoderplayer.IPlayer;
 
 /**
  * Created by Nat on 2017/1/29.

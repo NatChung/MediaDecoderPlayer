@@ -1,12 +1,13 @@
-package nat.chung.mediadecoderplayer;
+package nat.chung.mediadecoderplayer.decorator;
 
 import android.graphics.Bitmap;
 import android.media.MediaFormat;
-import android.view.TextureView;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+
+import nat.chung.mediadecoderplayer.IPlayer;
 
 /**
  * Created by Nat on 2017/1/29.
