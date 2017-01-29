@@ -19,9 +19,17 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:onClick="onPlayClicked"
         android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:onClick="onClick"/>
+        android:text="PLAY" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="onStopClicked"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:text="STOP" />
 
 </RelativeLayout>
