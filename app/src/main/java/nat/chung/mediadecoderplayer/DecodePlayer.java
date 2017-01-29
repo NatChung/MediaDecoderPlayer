@@ -39,7 +39,6 @@ public class DecodePlayer implements IPlayer, TextureView.SurfaceTextureListener
 
     @Override
     public void addVideoFrame(byte[] data, long timestamp) {
-        Log.i(TAG,"addVideoFrame");
 
         if(playTaskStatus != PLAY_TASK_STATUS.PLAY_TASK_RUNNING)
             return;
@@ -84,8 +83,6 @@ public class DecodePlayer implements IPlayer, TextureView.SurfaceTextureListener
         }
 
         releaseCodec();
-
-        Log.i(TAG,"End of stop playTaskStatus:"+playTaskStatus);
     }
 
     @Override

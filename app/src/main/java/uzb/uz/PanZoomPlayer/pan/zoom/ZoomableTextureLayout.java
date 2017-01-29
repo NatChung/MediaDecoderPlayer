@@ -17,25 +17,21 @@ public class ZoomableTextureLayout extends FrameLayout {
 
     public ZoomableTextureLayout(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        //this.zoomableTextureView = new ZoomableTextureView(context, attrs, defStyleAttr);
         init(context);
     }
 
     public ZoomableTextureLayout(Context context) {
         super(context);
-        //this.zoomableTextureView = new ZoomableTextureView(context);
         init(context);
     }
 
     public ZoomableTextureLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
-        //this.zoomableTextureView = new ZoomableTextureView(context, attrs);
         init(context);
     }
 
     private void init(Context context) {
 
-        Log.d(TAG, "init in ZooableTextureLayout");
         this.zoomableTextureView = new ZoomableTextureView(context);
         zoomableTextureView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
         this.addView(zoomableTextureView);

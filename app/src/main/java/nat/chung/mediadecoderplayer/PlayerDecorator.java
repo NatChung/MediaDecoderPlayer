@@ -14,7 +14,6 @@ public class PlayerDecorator implements IPlayer {
         this.iPlayer = iPlayer;
     }
 
-
     @Override
     public void addVideoFrame(byte[] data, long timestamp) {
 
