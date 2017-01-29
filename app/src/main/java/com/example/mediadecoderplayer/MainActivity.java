@@ -4,15 +4,11 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.pm.PackageManager;
 import android.content.res.AssetFileDescriptor;
-import android.graphics.SurfaceTexture;
 import android.media.MediaExtractor;
 import android.media.MediaFormat;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.DisplayMetrics;
-import android.util.Log;
-import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
 
@@ -21,32 +17,19 @@ import java.nio.ByteBuffer;
 
 import nat.chung.mediadecoderplayer.DemoPlayer;
 import nat.chung.mediadecoderplayer.R;
-import uzb.uz.PanZoomPlayer.pan.zoom.ZoomableTextureLayout;
 
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
     DemoPlayer player = null;
-    ZoomableTextureLayout zoomableTextureLayout;
     boolean endOfExtraFile = true;
-
-//    private DisplayMetrics displayMetrics;
-//    private int displayWidth;
-//    private int displayHeight;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-//        displayMetrics = new DisplayMetrics();
-//        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-//        displayWidth = displayMetrics.widthPixels;
-//        displayHeight = displayMetrics.heightPixels;
-
-        zoomableTextureLayout = (ZoomableTextureLayout)findViewById(R.id.video_view);
-        player = new DemoPlayer(this, zoomableTextureLayout.zoomableTextureView);
-
+        player = new DemoPlayer(this, (TextureView)findViewById(R.id.video_view));
         MainActivity.verifyStoragePermissions(this);
     }
 

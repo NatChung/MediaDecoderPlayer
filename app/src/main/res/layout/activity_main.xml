@@ -11,7 +11,7 @@
     tools:context="com.example.mediadecoderplayer.MainActivity">
 
 
-    <uzb.uz.PanZoomPlayer.pan.zoom.ZoomableTextureLayout
+    <TextureView
         android:id="@+id/video_view"
         android:layout_width="match_parent"
         android:layout_height="200dp"/>
