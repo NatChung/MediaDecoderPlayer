@@ -31,19 +31,4 @@ public class SnapshotDecorator extends PlayerDecorator {
         }
     }
 
-    @Override
-    public void addVideoFrame(byte[] data, long timestamp) {
-        super.addVideoFrame(data, timestamp);
-    }
-
-    @Override
-    public void setup(String mineType, MediaFormat format) throws IOException {
-        super.setup(mineType, format);
-    }
-
-    @Override
-    public void stop() {
-        super.stop();
-    }
-
 }
