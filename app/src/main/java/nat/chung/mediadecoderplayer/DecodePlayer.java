@@ -86,6 +86,11 @@ public class DecodePlayer implements IPlayer, TextureView.SurfaceTextureListener
     }
 
     @Override
+    public TextureView getTextureView() {
+        return textureView;
+    }
+
+    @Override
     public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture, int i, int i1) {
         surface = new Surface(surfaceTexture);
     }

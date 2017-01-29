@@ -1,5 +1,6 @@
 package nat.chung.mediadecoderplayer;
 import android.media.MediaFormat;
+import android.view.TextureView;
 
 import java.io.IOException;
 
@@ -12,4 +13,5 @@ public interface IPlayer {
     void addVideoFrame(byte[] data, long timestamp);
     void setup(String mineType, MediaFormat format) throws IOException;
     void stop();
+    TextureView getTextureView();
 }
