@@ -1,7 +1,9 @@
-package nat.chung.mediadecoderplayer;
+package com.example.mediadecoderplayer;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+
+import nat.chung.mediadecoderplayer.R;
 
 public class MainActivity extends AppCompatActivity {
 
