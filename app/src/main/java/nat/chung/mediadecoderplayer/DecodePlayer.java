@@ -40,13 +40,14 @@ public class DecodePlayer implements IPlayer, TextureView.SurfaceTextureListener
         if(playTaskStatus != PLAY_TASK_STATUS.PLAY_TASK_RUNNING)
             return;
 
-        synchronized(this){
-            int inputBufferIndex = decoder.dequeueInputBuffer(timeoutUs);
-            if (inputBufferIndex >= 0) {
-                ByteBuffer buf[] = decoder.getInputBuffers();
-                buf[inputBufferIndex].put(data);
-                decoder.queueInputBuffer(inputBufferIndex, 0, data.length, timestamp, 0);
-            }
+        if(decoder == null )
+            return;
+
+        int inputBufferIndex = decoder.dequeueInputBuffer(timeoutUs);
+        if (inputBufferIndex >= 0) {
+            ByteBuffer buf[] = decoder.getInputBuffers();
+            buf[inputBufferIndex].put(data);
+            decoder.queueInputBuffer(inputBufferIndex, 0, data.length, timestamp, 0);
         }
     }
 
@@ -142,12 +143,10 @@ public class DecodePlayer implements IPlayer, TextureView.SurfaceTextureListener
         if(decoder == null)
             return;
 
-        synchronized(this){
-            decoder.flush();
-            decoder.stop();
-            decoder.release();
-            decoder = null;
-        }
+        decoder.flush();
+        decoder.stop();
+        decoder.release();
+        decoder = null;
     }
 
 
