@@ -6,7 +6,7 @@ import android.view.TextureView;
 import java.io.IOException;
 
 import nat.chung.mediadecoderplayer.decorator.SnapshotDecorator;
-import nat.chung.mediadecoderplayer.decorator.ZoomDecorator;
+import nat.chung.mediadecoderplayer.decorator.Zoom.ZoomDecorator;
 
 /**
  * Created by Nat on 2017/1/29.

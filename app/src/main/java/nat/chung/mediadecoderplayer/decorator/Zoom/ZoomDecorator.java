@@ -1,4 +1,4 @@
-package nat.chung.mediadecoderplayer.decorator;
+package nat.chung.mediadecoderplayer.decorator.Zoom;
 
 import android.content.Context;
 import android.graphics.Matrix;
@@ -12,7 +12,8 @@ import android.view.View;
 import android.view.WindowManager;
 
 import nat.chung.mediadecoderplayer.IPlayer;
-import uzb.uz.PanZoomPlayer.pan.zoom.gestures.MoveGestureDetector;
+import nat.chung.mediadecoderplayer.decorator.PlayerDecorator;
+import nat.chung.mediadecoderplayer.decorator.Zoom.gestures.MoveGestureDetector;
 
 /**
  * Created by Nat on 2017/1/30.

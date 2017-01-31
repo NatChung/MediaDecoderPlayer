@@ -1,4 +1,4 @@
-package uzb.uz.PanZoomPlayer.pan.zoom.gestures;
+package nat.chung.mediadecoderplayer.decorator.Zoom.gestures;
 
 import android.content.Context;
 import android.view.MotionEvent;
