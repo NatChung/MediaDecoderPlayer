@@ -15,7 +15,6 @@ import android.view.View;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-import nat.chung.mediadecoderplayer.DemoPlayer;
 import nat.chung.mediadecoderplayer.IPlayer;
 import nat.chung.mediadecoderplayer.R;
 

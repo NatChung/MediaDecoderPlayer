@@ -1,10 +1,12 @@
-package nat.chung.mediadecoderplayer;
+package com.example.mediadecoderplayer;
 
 import android.content.Context;
 import android.media.MediaFormat;
 import android.view.TextureView;
 import java.io.IOException;
 
+import nat.chung.mediadecoderplayer.DecodePlayer;
+import nat.chung.mediadecoderplayer.IPlayer;
 import nat.chung.mediadecoderplayer.decorator.SnapshotDecorator;
 import nat.chung.mediadecoderplayer.decorator.Zoom.ZoomDecorator;
 
