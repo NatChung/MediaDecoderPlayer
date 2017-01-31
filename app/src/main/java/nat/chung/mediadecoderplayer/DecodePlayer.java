@@ -3,16 +3,11 @@ package nat.chung.mediadecoderplayer;
 import android.graphics.SurfaceTexture;
 import android.media.MediaCodec;
 import android.media.MediaFormat;
-import android.util.Log;
 import android.view.Surface;
 import android.view.TextureView;
-import android.widget.FrameLayout;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.concurrent.locks.Lock;
-
-import nat.chung.mediadecoderplayer.IPlayer;
 
 /**
  * Created by Nat on 2017/1/29.
@@ -40,8 +35,7 @@ public class DecodePlayer implements IPlayer, TextureView.SurfaceTextureListener
         this.textureView.setSurfaceTextureListener(this);
     }
 
-    @Override
-    public void addVideoFrame(byte[] data, long timestamp) {
+    private void addVideoFrame(byte[] data, long timestamp){
 
         if(playTaskStatus != PLAY_TASK_STATUS.PLAY_TASK_RUNNING)
             return;
@@ -53,6 +47,15 @@ public class DecodePlayer implements IPlayer, TextureView.SurfaceTextureListener
                 buf[inputBufferIndex].put(data);
                 decoder.queueInputBuffer(inputBufferIndex, 0, data.length, timestamp, 0);
             }
+        }
+    }
+
+
+    @Override
+    public void addAVFrame(AVFRAME_TYPE type, byte[] data, long timestamp) {
+
+        if(type == AVFRAME_TYPE.VIDEO){
+            addVideoFrame(data, timestamp);
         }
     }
 

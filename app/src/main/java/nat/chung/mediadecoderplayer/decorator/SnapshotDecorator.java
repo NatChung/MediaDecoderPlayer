@@ -1,11 +1,8 @@
 package nat.chung.mediadecoderplayer.decorator;
 
 import android.graphics.Bitmap;
-import android.media.MediaFormat;
-
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 
 import nat.chung.mediadecoderplayer.IPlayer;
 

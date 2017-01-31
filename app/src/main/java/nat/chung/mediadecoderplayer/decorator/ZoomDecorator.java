@@ -88,8 +88,7 @@ public class ZoomDecorator extends PlayerDecorator implements View.OnTouchListen
             dy = 0;
             mFocusY = dy + scaledImageCenterY;
         }
-//        Log.i(TAG, mMatrix.toString());
-//        Log.i(TAG, "dx:"+dx+", dy:"+dy);
+
         mMatrix.postTranslate(dx, dy);
         textureView.setTransform(mMatrix);
         textureView.setAlpha(1);

@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 
 import nat.chung.mediadecoderplayer.DemoPlayer;
+import nat.chung.mediadecoderplayer.IPlayer;
 import nat.chung.mediadecoderplayer.R;
 
 public class MainActivity extends AppCompatActivity {
@@ -86,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
             if(sampleSize > 0){
                 byte[] data = new byte[sampleSize];
                 inputBuffer.get(data);
-                player.addVideoFrame(data,mediaExtractor.getSampleTime());
+                player.addAVFrame(IPlayer.AVFRAME_TYPE.VIDEO, data,mediaExtractor.getSampleTime());
                 mediaExtractor.advance();
                 continue;
             }

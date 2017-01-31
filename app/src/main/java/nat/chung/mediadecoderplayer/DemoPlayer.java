@@ -30,8 +30,8 @@ public class DemoPlayer {
         player.setup(mineType, format);
     }
 
-    public void addVideoFrame(byte[] data, long timestamp){
-        player.addVideoFrame(data, timestamp);
+    public void addAVFrame(IPlayer.AVFRAME_TYPE type, byte[] data, long timestamp){
+        player.addAVFrame(type, data, timestamp);
     }
 
     public void snapshot(String savedPath){
