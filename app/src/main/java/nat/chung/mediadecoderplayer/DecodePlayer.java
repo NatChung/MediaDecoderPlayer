@@ -129,12 +129,10 @@ public class DecodePlayer implements IPlayer {
         if(decoder == null)
             return;
 
-        synchronized (this){
-            decoder.flush();
-            decoder.stop();
-            decoder.release();
-            decoder = null;
-        }
+        decoder.flush();
+        decoder.stop();
+        decoder.release();
+        decoder = null;
     }
 
 
