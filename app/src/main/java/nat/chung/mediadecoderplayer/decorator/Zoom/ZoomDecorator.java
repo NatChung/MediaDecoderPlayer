@@ -5,6 +5,7 @@ import android.graphics.Matrix;
 import android.graphics.PointF;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.TextureView;
@@ -23,12 +24,20 @@ public class ZoomDecorator extends PlayerDecorator implements View.OnTouchListen
 
     private static final String TAG = "ZoomDecorator";
     private Matrix mMatrix;
-    private ScaleGestureDetector mScaleDetector;
-    private MoveGestureDetector mMoveDetector;
+    private ScaleGestureDetector scaleDetector;
+    private MoveGestureDetector moveDetector;
+    private GestureDetector gestureDetector;
     private float mScaleFactor = 1.f;
     private float mFocusX = 0.f;
     private float mFocusY = 0.f;
     private TextureView textureView;
+    private SimpleOnGestureListener simpleOnGestureListener = null;
+
+    public interface SimpleOnGestureListener{
+        boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY);
+        void onViewTap(View view, float x, float y);
+    }
+
 
     public ZoomDecorator(Context context, IPlayer iPlayer) {
         super(iPlayer);
@@ -41,25 +50,29 @@ public class ZoomDecorator extends PlayerDecorator implements View.OnTouchListen
 
     private void init(Context context) {
         mMatrix = new Matrix();
-        mScaleDetector = new ScaleGestureDetector(context, new ScaleListener());
-        mMoveDetector = new MoveGestureDetector(context, new MoveListener());
+        scaleDetector = new ScaleGestureDetector(context, new ScaleListener());
+        moveDetector = new MoveGestureDetector(context, new MoveListener());
+        gestureDetector = new GestureDetector(context, new SingleTapListener());
     }
 
-    public void setDisplayMetrics(Context context) {
+    private void setDisplayMetrics(Context context) {
         DisplayMetrics displayMetrics = new DisplayMetrics();
         WindowManager windowManager = (WindowManager)context.getSystemService(Context.WINDOW_SERVICE);
         windowManager.getDefaultDisplay().getMetrics(displayMetrics);
         mFocusX = displayMetrics.widthPixels / 2;
         mFocusY = displayMetrics.widthPixels / 2;
+    }
 
-        Log.i(TAG,"X:"+mFocusX+", Y:"+mFocusY);
+    public void setSimpleOnGestureListener(SimpleOnGestureListener simpleOnGestureListener){
+        this.simpleOnGestureListener = simpleOnGestureListener;
     }
 
     @Override
     public boolean onTouch(View view, MotionEvent motionEvent) {
 
-        mScaleDetector.onTouchEvent(motionEvent);
-        mMoveDetector.onTouchEvent(motionEvent);
+        scaleDetector.onTouchEvent(motionEvent);
+        moveDetector.onTouchEvent(motionEvent);
+        gestureDetector.onTouchEvent(motionEvent);
 
         float scaledImageCenterX = (textureView.getWidth() * mScaleFactor) / 2;
         float scaledImageCenterY = (textureView.getHeight() * mScaleFactor) / 2;
@@ -116,6 +129,29 @@ public class ZoomDecorator extends PlayerDecorator implements View.OnTouchListen
             mFocusX += d.x;
             mFocusY += d.y;
             return true;
+        }
+    }
+
+    private class SingleTapListener extends GestureDetector.SimpleOnGestureListener {
+        @Override
+        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+
+            if (simpleOnGestureListener != null && mScaleFactor <= 1.0 )  {
+                return simpleOnGestureListener.onFling(e1, e2, velocityX, velocityY);
+            }
+
+            return super.onFling(e1, e2, velocityX, velocityY);
+        }
+
+        @Override
+        public boolean onSingleTapConfirmed(MotionEvent e) {
+
+            if (simpleOnGestureListener != null ){
+                simpleOnGestureListener.onViewTap(textureView, e.getX(), e.getY());
+                return true;
+            }
+
+            return super.onSingleTapConfirmed(e);
         }
     }
 }
