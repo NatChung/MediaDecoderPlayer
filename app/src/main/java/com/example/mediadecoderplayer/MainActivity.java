@@ -87,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
             if(sampleSize > 0){
                 byte[] data = new byte[sampleSize];
                 inputBuffer.get(data);
-                player.addAVFrame(IPlayer.AVFRAME_TYPE.VIDEO,data, (mediaExtractor.getSampleTime()+System.currentTimeMillis()));
+                player.addAVFrame(IPlayer.AVFRAME_TYPE.VIDEO,data, mediaExtractor.getSampleTime()/1000);
                 mediaExtractor.advance();
                 continue;
             }

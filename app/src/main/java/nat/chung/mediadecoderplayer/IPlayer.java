@@ -18,7 +18,7 @@ public interface IPlayer {
         VIDEO
     }
 
-    void addAVFrame(AVFRAME_TYPE type, byte[] data, long timestamp);
+    void addAVFrame(AVFRAME_TYPE type, byte[] data, long timestampMS);
     void setup(String mineType, MediaFormat format) throws IOException;
     void stop();
     TextureView getTextureView();
