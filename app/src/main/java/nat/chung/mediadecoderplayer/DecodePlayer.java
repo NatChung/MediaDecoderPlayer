@@ -21,7 +21,6 @@ public class DecodePlayer implements IPlayer, TextureView.SurfaceTextureListener
     private static final int timeoutUs = 1000000;
 
     private TextureView textureView;
-    private Surface surface;
     private MediaCodec decoder;
     private MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();
     private PLAY_TASK_STATUS playTaskStatus = PLAY_TASK_STATUS.PLAY_TASK_STOPPED;
@@ -64,8 +63,8 @@ public class DecodePlayer implements IPlayer, TextureView.SurfaceTextureListener
     @Override
     public void setup(String mineType, MediaFormat format) throws IOException{
 
-        if(surface == null){
-            throw new IOException("surface not ready yet");
+        if(textureView.getSurfaceTexture() == null){
+            throw new IOException("SurfaceTexture not ready yet");
         }
 
         if(playTaskStatus != PLAY_TASK_STATUS.PLAY_TASK_STOPPED){
@@ -92,7 +91,7 @@ public class DecodePlayer implements IPlayer, TextureView.SurfaceTextureListener
 
     @Override
     public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture, int i, int i1) {
-        surface = new Surface(surfaceTexture);
+
     }
 
     @Override
@@ -124,7 +123,7 @@ public class DecodePlayer implements IPlayer, TextureView.SurfaceTextureListener
 
     private void initCodec(String mineType, MediaFormat format) throws  IOException{
         decoder = MediaCodec.createDecoderByType(mineType);
-        decoder.configure(format, surface, null, 0 /* 0:decoder 1:encoder */);
+        decoder.configure(format, new Surface(textureView.getSurfaceTexture()), null, 0 /* 0:decoder 1:encoder */);
         decoder.start();
     }
 
