@@ -25,6 +25,11 @@ public class PlayerDecorator implements IPlayer {
     }
 
     @Override
+    public void finishAVFrame() {
+        iPlayer.finishAVFrame();
+    }
+
+    @Override
     public void setup(String mineType, MediaFormat format) throws IOException {
         iPlayer.setup(mineType, format) ;
     }

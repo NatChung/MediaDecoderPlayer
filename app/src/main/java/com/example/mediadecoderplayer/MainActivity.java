@@ -96,6 +96,7 @@ public class MainActivity extends AppCompatActivity {
 
         endOfExtraFile = true;
         mediaExtractor.release();
+        player.dataFinish();
     }
 
 
