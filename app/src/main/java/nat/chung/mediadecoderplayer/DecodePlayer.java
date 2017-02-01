@@ -1,5 +1,9 @@
 package nat.chung.mediadecoderplayer;
 
+import android.graphics.SurfaceTexture;
+import android.media.AudioFormat;
+import android.media.AudioManager;
+import android.media.AudioTrack;
 import android.media.MediaCodec;
 import android.media.MediaFormat;
 import android.util.Log;
@@ -17,10 +21,10 @@ import static android.os.SystemClock.sleep;
  * Created by Nat on 2017/1/29.
  */
 
-public class DecodePlayer implements IPlayer {
+public class DecodePlayer implements IPlayer, TextureView.SurfaceTextureListener {
 
     private static final String TAG = "DecodePlayer";
-    private static final int timeoutUs = 10000;
+    private static final int timeoutUs = 1000000;
     private static final long SHORT_SLEEP_TME_IN_MS = 10;
 
     private TextureView textureView;
@@ -30,6 +34,9 @@ public class DecodePlayer implements IPlayer {
     private Queue<AVFrame> videoFrameQueue;
     private OnDecodePlayerPlaybackListener onDecodePlayerPlaybackListener;
     private boolean avFrameFinished = false;
+    private Surface surface;
+    private AudioTrack audioTrack;
+
 
     enum PLAY_TASK_STATUS {
         PLAY_TASK_RUNNING,
@@ -39,6 +46,7 @@ public class DecodePlayer implements IPlayer {
 
     public DecodePlayer(TextureView textureView){
         this.textureView = textureView;
+        this.textureView.setSurfaceTextureListener(this);
         videoFrameQueue = new LinkedBlockingQueue<>();
     }
 
@@ -46,11 +54,22 @@ public class DecodePlayer implements IPlayer {
         videoFrameQueue.offer(new AVFrame(data, timestampMS));
     }
 
+    private void addAudioFrame(byte[] data) {
+        if(audioTrack != null)
+            audioTrack.write(data, 0, data.length);
+    }
+
     private void initCodec(String mineType, MediaFormat format) throws  IOException{
         bufferInfo = new MediaCodec.BufferInfo();
         decoder = MediaCodec.createDecoderByType(mineType);
-        decoder.configure(format, new Surface(textureView.getSurfaceTexture()), null, 0 /* 0:decoder 1:encoder */);
+        decoder.configure(format, surface, null, 0 /* 0:decoder 1:encoder */);
         decoder.start();
+    }
+
+    private void initAudioTrack(int streamType, int sampleRateInHz, int channelConfig, int audioFormat, int mode){
+        int minBufferSize = AudioTrack.getMinBufferSize(sampleRateInHz, channelConfig, audioFormat);
+        audioTrack = new AudioTrack(streamType, sampleRateInHz, channelConfig, audioFormat, minBufferSize << 2, mode);
+        audioTrack.play();
     }
 
     private void releaseCodec(){
@@ -62,6 +81,16 @@ public class DecodePlayer implements IPlayer {
         decoder.stop();
         decoder.release();
         decoder = null;
+    }
+
+    private void releaseAudio(){
+        if(audioTrack == null)
+            return;
+
+        audioTrack.flush();
+        audioTrack.stop();
+        audioTrack.release();
+        audioTrack = null;
     }
 
 
@@ -98,10 +127,6 @@ public class DecodePlayer implements IPlayer {
             playTaskStatus = PLAY_TASK_STATUS.PLAY_TASK_STOPING;
     }
 
-    private void cleanAVFrameQueue(){
-        videoFrameQueue.clear();
-    }
-
     private void waitForPlayTaskEnd(){
 
         while (playTaskStatus != PLAY_TASK_STATUS.PLAY_TASK_STOPPED){
@@ -136,6 +161,7 @@ public class DecodePlayer implements IPlayer {
     }
 
     private void videoDecoderEnqueueFrame(AVFrame videoFrame){
+
         int inputBufferIndex = decoder.dequeueInputBuffer(timeoutUs);
         if (inputBufferIndex >= 0) {
             ByteBuffer buf[] = decoder.getInputBuffers();
@@ -145,7 +171,7 @@ public class DecodePlayer implements IPlayer {
     }
 
     private void videoDecoderDequeueFrame(){
-        if (isSurfaceTextureDestroyed()) return;
+
         int outputBufferIndex = decoder.dequeueOutputBuffer(bufferInfo, timeoutUs);
         if (outputBufferIndex >= 0) {
             decoder.releaseOutputBuffer(outputBufferIndex, true);
@@ -154,9 +180,6 @@ public class DecodePlayer implements IPlayer {
         }
     }
 
-    private boolean isSurfaceTextureDestroyed(){
-        return (textureView == null);
-    }
 
     private long baseTimestamp = 0;
     private void playTask()  {
@@ -175,20 +198,41 @@ public class DecodePlayer implements IPlayer {
     }
 
     @Override
+    public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
+        this.surface = new Surface(surface);
+    }
+
+    @Override
+    public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
+
+    }
+
+    @Override
+    public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
+        stopPlayTask();
+        return false;
+    }
+
+    @Override
+    public void onSurfaceTextureUpdated(SurfaceTexture surface) {
+
+    }
+
+    @Override
     public void addAVFrame(AVFRAME_TYPE type, byte[] data, long timestampMS) {
 
         if(type == AVFRAME_TYPE.VIDEO){
             addVideoFrame(data, timestampMS);
+        }else {
+            addAudioFrame(data);
         }
     }
 
     @Override
-    public void finishAVFrame() {
-        avFrameFinished = true;
-    }
+    public void finishAddAVFrame() { avFrameFinished = true; }
 
     @Override
-    public void setup(String mineType, MediaFormat format) throws IOException{
+    public void setupVideoDecoder(String mineType, MediaFormat format) throws IOException {
 
         if(textureView.getSurfaceTexture() == null){
             throw new IOException("SurfaceTexture not ready yet");
@@ -207,13 +251,21 @@ public class DecodePlayer implements IPlayer {
     }
 
     @Override
+    public void setupPCM(int streamType, int sampleRateInHz, int channelConfig, int audioFormat, int mode) {
+        initAudioTrack(streamType, sampleRateInHz, channelConfig, audioFormat, mode);
+    }
+
+
+
+    @Override
     public void stop() {
 
         stopPlayTask();
         waitForPlayTaskEnd();
         releaseCodec();
-        cleanAVFrameQueue();
+        releaseAudio();
 
+        videoFrameQueue.clear();
         baseTimestamp = 0;
         avFrameFinished = false;
     }

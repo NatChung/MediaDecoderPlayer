@@ -33,11 +33,11 @@ public class DemoPlayer implements DecodePlayer.OnDecodePlayerPlaybackListener {
     }
 
     public void dataFinish(){
-        player.finishAVFrame();
+        player.finishAddAVFrame();
     }
 
     public void setup(String mineType, MediaFormat format) throws IOException {
-        player.setup(mineType, format);
+        player.setupVideoDecoder(mineType, format);
     }
 
     public void addAVFrame(IPlayer.AVFRAME_TYPE type, byte[] data, long timestampMS){

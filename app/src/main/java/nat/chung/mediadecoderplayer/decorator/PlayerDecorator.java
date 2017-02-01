@@ -25,13 +25,18 @@ public class PlayerDecorator implements IPlayer {
     }
 
     @Override
-    public void finishAVFrame() {
-        iPlayer.finishAVFrame();
+    public void finishAddAVFrame() {
+        iPlayer.finishAddAVFrame();
     }
 
     @Override
-    public void setup(String mineType, MediaFormat format) throws IOException {
-        iPlayer.setup(mineType, format) ;
+    public void setupVideoDecoder(String mineType, MediaFormat format) throws IOException {
+        iPlayer.setupVideoDecoder(mineType, format) ;
+    }
+
+    @Override
+    public void setupPCM(int streamType, int sampleRateInHz, int channelConfig, int audioFormat, int mode) {
+        iPlayer.setupPCM(streamType, sampleRateInHz, channelConfig, audioFormat, mode);
     }
 
     @Override
