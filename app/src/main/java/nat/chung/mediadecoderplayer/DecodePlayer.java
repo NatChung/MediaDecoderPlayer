@@ -20,14 +20,13 @@ import static android.os.SystemClock.sleep;
 public class DecodePlayer implements IPlayer {
 
     private static final String TAG = "DecodePlayer";
-    private static final int timeoutUs = 1000000;
+    private static final int timeoutUs = 10000;
     private static final long SHORT_SLEEP_TME_IN_MS = 10;
 
     private TextureView textureView;
     private MediaCodec decoder = null;
     private MediaCodec.BufferInfo bufferInfo = null;
     private PLAY_TASK_STATUS playTaskStatus = PLAY_TASK_STATUS.PLAY_TASK_STOPPED;
-    private Queue<AVFrame> audioFrameQueue;
     private Queue<AVFrame> videoFrameQueue;
     private OnDecodePlayerPlaybackListener onDecodePlayerPlaybackListener;
     private boolean avFrameFinished = false;
@@ -39,17 +38,11 @@ public class DecodePlayer implements IPlayer {
     }
 
     public DecodePlayer(TextureView textureView){
-
         this.textureView = textureView;
-        audioFrameQueue = new LinkedBlockingQueue<>();
         videoFrameQueue = new LinkedBlockingQueue<>();
     }
 
     private void addVideoFrame(byte[] data, long timestampMS){
-
-        if((playTaskStatus != PLAY_TASK_STATUS.PLAY_TASK_RUNNING)||(decoder == null ))
-            return;
-
         videoFrameQueue.offer(new AVFrame(data, timestampMS));
     }
 
@@ -106,7 +99,6 @@ public class DecodePlayer implements IPlayer {
     }
 
     private void cleanAVFrameQueue(){
-        audioFrameQueue.clear();
         videoFrameQueue.clear();
     }
 
@@ -153,12 +145,17 @@ public class DecodePlayer implements IPlayer {
     }
 
     private void videoDecoderDequeueFrame(){
+        if (isSurfaceTextureDestroyed()) return;
         int outputBufferIndex = decoder.dequeueOutputBuffer(bufferInfo, timeoutUs);
         if (outputBufferIndex >= 0) {
             decoder.releaseOutputBuffer(outputBufferIndex, true);
             startOnDidPlay();
             sleepForNextFrame(bufferInfo.presentationTimeUs/1000);
         }
+    }
+
+    private boolean isSurfaceTextureDestroyed(){
+        return (textureView == null);
     }
 
     private long baseTimestamp = 0;
@@ -187,7 +184,6 @@ public class DecodePlayer implements IPlayer {
 
     @Override
     public void finishAVFrame() {
-        Log.i("NatDebug", "finishAVFrame");
         avFrameFinished = true;
     }
 
