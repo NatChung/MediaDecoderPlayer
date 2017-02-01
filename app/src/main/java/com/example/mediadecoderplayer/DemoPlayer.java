@@ -52,4 +52,9 @@ public class DemoPlayer implements DecodePlayer.OnDecodePlayerPlaybackListener {
     public void onDidFinishPlay() {
         player.stop();
     }
+
+    @Override
+    public void onDidPlay() {
+        Log.i(TAG,"onDidPlay~~~~~~~~~~~~~");
+    }
 }

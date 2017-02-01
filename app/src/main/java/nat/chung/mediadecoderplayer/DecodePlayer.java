@@ -86,9 +86,17 @@ public class DecodePlayer implements IPlayer {
             return;
 
         new Thread(new Runnable() {
-            public void run() {
-                onDecodePlayerPlaybackListener.onDidFinishPlay();
-            }
+            public void run() { onDecodePlayerPlaybackListener.onDidFinishPlay();}
+        }).start();
+    }
+
+    private void startOnDidPlay(){
+
+        if(baseTimestamp != 0 || onDecodePlayerPlaybackListener == null)
+            return;
+
+        new Thread(new Runnable() {
+            public void run() { onDecodePlayerPlaybackListener.onDidPlay();}
         }).start();
     }
 
@@ -148,6 +156,7 @@ public class DecodePlayer implements IPlayer {
         int outputBufferIndex = decoder.dequeueOutputBuffer(bufferInfo, timeoutUs);
         if (outputBufferIndex >= 0) {
             decoder.releaseOutputBuffer(outputBufferIndex, true);
+            startOnDidPlay();
             sleepForNextFrame(bufferInfo.presentationTimeUs/1000);
         }
     }
@@ -234,6 +243,7 @@ public class DecodePlayer implements IPlayer {
 
     public interface OnDecodePlayerPlaybackListener{
         void onDidFinishPlay();
+        void onDidPlay();
     }
 }
 
