@@ -1,6 +1,5 @@
 package nat.chung.mediadecoderplayer;
 
-import android.graphics.SurfaceTexture;
 import android.media.MediaCodec;
 import android.media.MediaFormat;
 import android.view.Surface;
@@ -8,6 +7,8 @@ import android.view.TextureView;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.Queue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import static android.os.SystemClock.sleep;
 
@@ -15,15 +16,18 @@ import static android.os.SystemClock.sleep;
  * Created by Nat on 2017/1/29.
  */
 
-public class DecodePlayer implements IPlayer, TextureView.SurfaceTextureListener {
+public class DecodePlayer implements IPlayer {
 
     private static final String TAG = "DecodePlayer";
     private static final int timeoutUs = 1000000;
+    private static final long SHOT_SLEEP_TIME_MS = 10;
 
     private TextureView textureView;
-    private MediaCodec decoder;
-    private MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();
+    private MediaCodec decoder = null;
+    private MediaCodec.BufferInfo bufferInfo = null;
     private PLAY_TASK_STATUS playTaskStatus = PLAY_TASK_STATUS.PLAY_TASK_STOPPED;
+    private Queue<AVFrame> audioFrameQueue;
+    private Queue<AVFrame> videoFrameQueue;
 
     enum PLAY_TASK_STATUS {
         PLAY_TASK_RUNNING,
@@ -32,8 +36,10 @@ public class DecodePlayer implements IPlayer, TextureView.SurfaceTextureListener
     }
 
     public DecodePlayer(TextureView textureView){
+
         this.textureView = textureView;
-        this.textureView.setSurfaceTextureListener(this);
+        audioFrameQueue = new LinkedBlockingQueue<>();
+        videoFrameQueue = new LinkedBlockingQueue<>();
     }
 
     private void addVideoFrame(byte[] data, long timestampMS){
@@ -41,14 +47,7 @@ public class DecodePlayer implements IPlayer, TextureView.SurfaceTextureListener
         if((playTaskStatus != PLAY_TASK_STATUS.PLAY_TASK_RUNNING)||(decoder == null ))
             return;
 
-        synchronized (this){
-            int inputBufferIndex = decoder.dequeueInputBuffer(timeoutUs);
-            if (inputBufferIndex >= 0) {
-                ByteBuffer buf[] = decoder.getInputBuffers();
-                buf[inputBufferIndex].put(data);
-                decoder.queueInputBuffer(inputBufferIndex, 0, data.length, timestampMS*1000, 0);
-            }
-        }
+        videoFrameQueue.offer(new AVFrame(data, timestampMS));
     }
 
 
@@ -82,6 +81,7 @@ public class DecodePlayer implements IPlayer, TextureView.SurfaceTextureListener
         waitForPlayTaskEnd();
         releaseCodec();
         baseTimestamp = 0;
+        cleanAVFrameQueue();
     }
 
     @Override
@@ -89,29 +89,25 @@ public class DecodePlayer implements IPlayer, TextureView.SurfaceTextureListener
         return textureView;
     }
 
-    @Override
-    public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture, int i, int i1) {
-
-    }
-
-    @Override
-    public void onSurfaceTextureSizeChanged(SurfaceTexture surfaceTexture, int i, int i1) {}
-
-    @Override
-    public boolean onSurfaceTextureDestroyed(SurfaceTexture surfaceTexture) {
-        return false;
-    }
-
-    @Override
-    public void onSurfaceTextureUpdated(SurfaceTexture surfaceTexture) {}
-
-
     private long baseTimestamp = 0;
     private void playTask() throws IOException, InterruptedException {
 
         playTaskStatus = PLAY_TASK_STATUS.PLAY_TASK_RUNNING;
 
         while (playTaskStatus == PLAY_TASK_STATUS.PLAY_TASK_RUNNING){
+
+            if(videoFrameQueue.size() == 0){
+                sleep(SHOT_SLEEP_TIME_MS);continue;
+            }
+
+            AVFrame videoFrame = videoFrameQueue.poll();
+            int inputBufferIndex = decoder.dequeueInputBuffer(timeoutUs);
+            if (inputBufferIndex >= 0) {
+                ByteBuffer buf[] = decoder.getInputBuffers();
+                buf[inputBufferIndex].put(videoFrame.data);
+                decoder.queueInputBuffer(inputBufferIndex, 0, videoFrame.data.length, videoFrame.timestampMS*1000, 0);
+            }
+
             int outputBufferIndex = decoder.dequeueOutputBuffer(bufferInfo, timeoutUs);
             if (outputBufferIndex >= 0) {
                 decoder.releaseOutputBuffer(outputBufferIndex, true);
@@ -122,6 +118,7 @@ public class DecodePlayer implements IPlayer, TextureView.SurfaceTextureListener
     }
 
     private void initCodec(String mineType, MediaFormat format) throws  IOException{
+        bufferInfo = new MediaCodec.BufferInfo();
         decoder = MediaCodec.createDecoderByType(mineType);
         decoder.configure(format, new Surface(textureView.getSurfaceTexture()), null, 0 /* 0:decoder 1:encoder */);
         decoder.start();
@@ -161,11 +158,16 @@ public class DecodePlayer implements IPlayer, TextureView.SurfaceTextureListener
         playTaskStatus = PLAY_TASK_STATUS.PLAY_TASK_STOPING;
     }
 
+    private void cleanAVFrameQueue(){
+        audioFrameQueue.clear();
+        videoFrameQueue.clear();
+    }
+
     private void waitForPlayTaskEnd(){
 
         while (playTaskStatus != PLAY_TASK_STATUS.PLAY_TASK_STOPPED){
             try {
-                Thread.sleep(10);
+                Thread.sleep(SHOT_SLEEP_TIME_MS);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -179,8 +181,20 @@ public class DecodePlayer implements IPlayer, TextureView.SurfaceTextureListener
         }
 
         while((baseTimestamp + timestamp) > System.currentTimeMillis() && (playTaskStatus == PLAY_TASK_STATUS.PLAY_TASK_RUNNING)) {
-            sleep(10);
+            sleep(SHOT_SLEEP_TIME_MS);
         }
+    }
+
+
+
+    private class AVFrame{
+        public final byte[] data;
+        public final long timestampMS;
+        public AVFrame(byte[] data, long timestampMS){
+            this.data = data;
+            this.timestampMS = timestampMS;
+        }
+
     }
 }
 
