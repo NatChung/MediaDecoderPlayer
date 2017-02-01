@@ -53,6 +53,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void onStopClicked(@SuppressWarnings("unused") View unused){
         endOfExtraFile = true;
+        player.stop();
     }
 
     public void onSnapshotClicked(@SuppressWarnings("unused") View unused){
@@ -86,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
             if(sampleSize > 0){
                 byte[] data = new byte[sampleSize];
                 inputBuffer.get(data);
-                player.addAVFrame(IPlayer.AVFRAME_TYPE.VIDEO, data,mediaExtractor.getSampleTime());
+                player.addAVFrame(IPlayer.AVFRAME_TYPE.VIDEO,data, (mediaExtractor.getSampleTime()+System.currentTimeMillis()));
                 mediaExtractor.advance();
                 continue;
             }
@@ -94,7 +95,6 @@ public class MainActivity extends AppCompatActivity {
         }
 
         endOfExtraFile = true;
-        player.stop();
         mediaExtractor.release();
     }
 
