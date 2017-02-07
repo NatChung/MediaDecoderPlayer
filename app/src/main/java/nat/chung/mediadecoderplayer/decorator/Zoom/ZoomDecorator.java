@@ -30,6 +30,7 @@ public class ZoomDecorator extends PlayerDecorator implements View.OnTouchListen
     private float mScaleFactor = 1.f;
     private float mFocusX = 0.f;
     private float mFocusY = 0.f;
+    private float xRation, yRation;
     private TextureView textureView;
     private SimpleOnGestureListener simpleOnGestureListener = null;
 
@@ -74,8 +75,9 @@ public class ZoomDecorator extends PlayerDecorator implements View.OnTouchListen
         moveDetector.onTouchEvent(motionEvent);
         gestureDetector.onTouchEvent(motionEvent);
 
-        float scaledImageCenterX = (textureView.getWidth() * mScaleFactor) / 2;
-        float scaledImageCenterY = (textureView.getHeight() * mScaleFactor) / 2;
+        float scaledImageCenterX = (textureView.getWidth() * mScaleFactor * xRation) ;
+        float scaledImageCenterY = (textureView.getHeight() * mScaleFactor * yRation) ;
+
 
         mMatrix.reset();
         mMatrix.postScale(mScaleFactor, mScaleFactor);
@@ -103,25 +105,52 @@ public class ZoomDecorator extends PlayerDecorator implements View.OnTouchListen
             mFocusY = dy + scaledImageCenterY;
         }
 
+
         mMatrix.postTranslate(dx, dy);
         textureView.setTransform(mMatrix);
         textureView.setAlpha(1);
+        textureView.invalidate();
+
         return true; // indicate event was handled
 
     }
 
     private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
+
+        private boolean initFocus = false;
+
+        @Override
+        public boolean onScaleBegin(ScaleGestureDetector detector) {
+            initFocus = false;
+            return true;
+        }
+
         @Override
         public boolean onScale(ScaleGestureDetector detector) {
 
-            mScaleFactor *= detector.getScaleFactor(); // scale change since previous event
-            // Don't let the object get too small or too large.
+            if(initFocus == false){
+                initFocus = true;
+                initFocus(detector);
+            }
+
+            mScaleFactor *= detector.getScaleFactor();
             mScaleFactor = Math.max(1.f, Math.min(mScaleFactor, 4.0f));
+
             return true;
+        }
+
+        private void initFocus(ScaleGestureDetector detector){
+            if(detector.getScaleFactor() >= 1){
+                xRation =  detector.getFocusX() / textureView.getWidth() ;
+                yRation = detector.getFocusY() / textureView.getHeight();
+                mFocusX = detector.getFocusX();
+                mFocusY = detector.getFocusY();
+            }
         }
     }
 
     private class MoveListener extends MoveGestureDetector.SimpleOnMoveGestureListener {
+
         @Override
         public boolean onMove(MoveGestureDetector detector) {
 
