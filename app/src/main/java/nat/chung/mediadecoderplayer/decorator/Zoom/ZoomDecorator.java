@@ -75,22 +75,20 @@ public class ZoomDecorator extends PlayerDecorator implements View.OnTouchListen
         float scaledTextureViewFocusX = (textureView.getWidth() * mScaleFactor * textureViewRatioX) ;
         float scaledTextureViewFocusY = (textureView.getHeight() * mScaleFactor * textureViewRatioY) ;
 
-
         mMatrix.reset();
         mMatrix.postScale(mScaleFactor, mScaleFactor);
+        mMatrix.postTranslate( getTranslateX(scaledTextureViewFocusX), getTranslateY(scaledTextureViewFocusY));
+        textureView.setTransform(mMatrix);
+        textureView.setAlpha(1);
+        textureView.invalidate();
 
-        translateX = windowFocusX - scaledTextureViewFocusX;
+        return true; // indicate event was handled
+
+    }
+
+    private float getTranslateY(float scaledTextureViewFocusY) {
+
         translateY = windowFocusY - scaledTextureViewFocusY;
-
-        if (translateX < ((1 - mScaleFactor) * textureView.getWidth())) {
-            translateX = (1 - mScaleFactor) * textureView.getWidth();
-            windowFocusX = translateX + scaledTextureViewFocusX;
-        }
-
-        if (translateX > 0) {
-            translateX = 0;
-            windowFocusX = translateX + scaledTextureViewFocusX;
-        }
 
         if (translateY < ((1 - mScaleFactor) * textureView.getHeight())) {
             translateY = (1 - mScaleFactor) * textureView.getHeight();
@@ -102,13 +100,24 @@ public class ZoomDecorator extends PlayerDecorator implements View.OnTouchListen
             windowFocusY = translateY + scaledTextureViewFocusY;
         }
 
-        mMatrix.postTranslate(translateX, translateY);
-        textureView.setTransform(mMatrix);
-        textureView.setAlpha(1);
-        textureView.invalidate();
+        return translateY;
+    }
 
-        return true; // indicate event was handled
+    private float getTranslateX(float scaledTextureViewFocusX) {
 
+        translateX = windowFocusX - scaledTextureViewFocusX;
+
+        if (translateX < ((1 - mScaleFactor) * textureView.getWidth())) {
+            translateX = (1 - mScaleFactor) * textureView.getWidth();
+            windowFocusX = translateX + scaledTextureViewFocusX;
+        }
+
+        if (translateX > 0) {
+            translateX = 0;
+            windowFocusX = translateX + scaledTextureViewFocusX;
+        }
+
+        return translateX;
     }
 
     private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
