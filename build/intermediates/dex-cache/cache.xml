@@ -61,7 +61,7 @@
         jumboMode="true"
         optimize="true"
         revision="25.0.0"
-        sha1="a1c69edca485ebde5584639f66c27f578d46e66e">
+        sha1="3d4caf10b83267503d8c8fce25b68e27cc5503e8">
         <dex dex="/Users/nat/Desktop/MediaDecoderPlayer/app/build/intermediates/transforms/dex/debug/folders/1000/10/instant-run-bootstrap_a55b16474dc3c623ad19cd78f6feae4d31d53162/classes.dex" />
     </item>
     <item
@@ -106,7 +106,7 @@
         jumboMode="true"
         optimize="true"
         revision="25.0.0"
-        sha1="c3c62f578939b24b258f3093d70fe521965c5e37">
+        sha1="9fa5b6b23ecc34456863d7ecc645852ee08136ea">
         <dex dex="/Users/nat/Desktop/MediaDecoderPlayer/app/build/intermediates/transforms/dex/debug/folders/1000/10/instant-run_97f2c46c8946cc359ef2e048636207f59bb65e46/classes.dex" />
     </item>
 

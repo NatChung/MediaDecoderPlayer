@@ -27,10 +27,15 @@ public class ZoomDecorator extends PlayerDecorator implements View.OnTouchListen
     private ScaleGestureDetector scaleDetector;
     private MoveGestureDetector moveDetector;
     private GestureDetector gestureDetector;
+    
     private float mScaleFactor = 1.f;
-    private float mFocusX = 0.f;
-    private float mFocusY = 0.f;
-    private float xRation, yRation;
+    private float windowFocusX = 0.f;
+    private float windowFocusY = 0.f;
+    private float translateX = 0f;
+    private float translateY = 0f;
+    private float textureViewRatioX = 0f;
+    private float textureViewRatioY = 0f;
+
     private TextureView textureView;
     private SimpleOnGestureListener simpleOnGestureListener = null;
 
@@ -46,7 +51,6 @@ public class ZoomDecorator extends PlayerDecorator implements View.OnTouchListen
         textureView = iPlayer.getTextureView();
         textureView.setOnTouchListener(this);
         init(context);
-        setDisplayMetrics(context);
     }
 
     private void init(Context context) {
@@ -56,13 +60,6 @@ public class ZoomDecorator extends PlayerDecorator implements View.OnTouchListen
         gestureDetector = new GestureDetector(context, new SingleTapListener());
     }
 
-    private void setDisplayMetrics(Context context) {
-        DisplayMetrics displayMetrics = new DisplayMetrics();
-        WindowManager windowManager = (WindowManager)context.getSystemService(Context.WINDOW_SERVICE);
-        windowManager.getDefaultDisplay().getMetrics(displayMetrics);
-        mFocusX = displayMetrics.widthPixels / 2;
-        mFocusY = displayMetrics.widthPixels / 2;
-    }
 
     public void setSimpleOnGestureListener(SimpleOnGestureListener simpleOnGestureListener){
         this.simpleOnGestureListener = simpleOnGestureListener;
@@ -75,38 +72,37 @@ public class ZoomDecorator extends PlayerDecorator implements View.OnTouchListen
         moveDetector.onTouchEvent(motionEvent);
         gestureDetector.onTouchEvent(motionEvent);
 
-        float scaledImageCenterX = (textureView.getWidth() * mScaleFactor * xRation) ;
-        float scaledImageCenterY = (textureView.getHeight() * mScaleFactor * yRation) ;
+        float scaledTextureViewFocusX = (textureView.getWidth() * mScaleFactor * textureViewRatioX) ;
+        float scaledTextureViewFocusY = (textureView.getHeight() * mScaleFactor * textureViewRatioY) ;
 
 
         mMatrix.reset();
         mMatrix.postScale(mScaleFactor, mScaleFactor);
 
-        float dx = mFocusX - scaledImageCenterX;
-        float dy = mFocusY - scaledImageCenterY;
+        translateX = windowFocusX - scaledTextureViewFocusX;
+        translateY = windowFocusY - scaledTextureViewFocusY;
 
-        if (dx < ((1 - mScaleFactor) * textureView.getWidth())) {
-            dx = (1 - mScaleFactor) * textureView.getWidth();
-            mFocusX = dx + scaledImageCenterX;
+        if (translateX < ((1 - mScaleFactor) * textureView.getWidth())) {
+            translateX = (1 - mScaleFactor) * textureView.getWidth();
+            windowFocusX = translateX + scaledTextureViewFocusX;
         }
 
-        if (dy < ((1 - mScaleFactor) * textureView.getHeight())) {
-            dy = (1 - mScaleFactor) * textureView.getHeight();
-            mFocusY = dy + scaledImageCenterY;
+        if (translateX > 0) {
+            translateX = 0;
+            windowFocusX = translateX + scaledTextureViewFocusX;
         }
 
-        if (dx > 0) {
-            dx = 0;
-            mFocusX = dx + scaledImageCenterX;
+        if (translateY < ((1 - mScaleFactor) * textureView.getHeight())) {
+            translateY = (1 - mScaleFactor) * textureView.getHeight();
+            windowFocusY = translateY + scaledTextureViewFocusY;
         }
 
-        if (dy > 0) {
-            dy = 0;
-            mFocusY = dy + scaledImageCenterY;
+        if (translateY > 0) {
+            translateY = 0;
+            windowFocusY = translateY + scaledTextureViewFocusY;
         }
 
-
-        mMatrix.postTranslate(dx, dy);
+        mMatrix.postTranslate(translateX, translateY);
         textureView.setTransform(mMatrix);
         textureView.setAlpha(1);
         textureView.invalidate();
@@ -117,35 +113,25 @@ public class ZoomDecorator extends PlayerDecorator implements View.OnTouchListen
 
     private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
 
-        private boolean initFocus = false;
-
         @Override
         public boolean onScaleBegin(ScaleGestureDetector detector) {
-            initFocus = false;
+
+            windowFocusX = detector.getFocusX();
+            windowFocusY = detector.getFocusY();
+
+            textureViewRatioX =  (windowFocusX - translateX) / (textureView.getWidth() * mScaleFactor);
+            textureViewRatioY = (windowFocusY - translateY) / (textureView.getHeight() * mScaleFactor);
+
             return true;
         }
 
         @Override
         public boolean onScale(ScaleGestureDetector detector) {
 
-            if(initFocus == false){
-                initFocus = true;
-                initFocus(detector);
-            }
-
             mScaleFactor *= detector.getScaleFactor();
             mScaleFactor = Math.max(1.f, Math.min(mScaleFactor, 4.0f));
 
             return true;
-        }
-
-        private void initFocus(ScaleGestureDetector detector){
-            if(detector.getScaleFactor() >= 1){
-                xRation =  detector.getFocusX() / textureView.getWidth() ;
-                yRation = detector.getFocusY() / textureView.getHeight();
-                mFocusX = detector.getFocusX();
-                mFocusY = detector.getFocusY();
-            }
         }
     }
 
@@ -155,8 +141,8 @@ public class ZoomDecorator extends PlayerDecorator implements View.OnTouchListen
         public boolean onMove(MoveGestureDetector detector) {
 
             PointF d = detector.getFocusDelta();
-            mFocusX += d.x;
-            mFocusY += d.y;
+            windowFocusX += d.x;
+            windowFocusY += d.y;
             return true;
         }
     }
