@@ -9,6 +9,7 @@ import android.media.MediaFormat;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.TextureView;
 import android.view.View;
 
@@ -17,19 +18,20 @@ import java.nio.ByteBuffer;
 
 import nat.chung.mediadecoderplayer.IPlayer;
 import nat.chung.mediadecoderplayer.R;
+import nat.chung.mediadecoderplayer.SQLoader;
 
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
     DemoPlayer player = null;
     boolean endOfExtraFile = true;
+    private String DB_PATH = "/sdcard/mediacodec/temp.db";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        player = new DemoPlayer(this, (TextureView)findViewById(R.id.video_view));
+        
         MainActivity.verifyStoragePermissions(this);
     }
 
@@ -38,8 +40,10 @@ public class MainActivity extends AppCompatActivity {
 
         if(endOfExtraFile == false)
             return;
-
+        
         endOfExtraFile = false;
+        
+        player = new DemoPlayer(this, (TextureView)findViewById(R.id.video_view));
         new Thread(new Runnable() {
             public void run() {
                 try {
@@ -49,6 +53,16 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }).start();
+    }
+
+    @SuppressWarnings("unused")
+    public void onSQLPlayClicked(View unused){
+        try {
+            player = new DemoPlayer(this, (TextureView)findViewById(R.id.video_view), DB_PATH);
+        } catch (IOException e) {
+            Log.i("ClementDebug", "onSQLPlayClicked: DB file don't exit. ");
+        }
+
     }
 
     public void onStopClicked(@SuppressWarnings("unused") View unused){
