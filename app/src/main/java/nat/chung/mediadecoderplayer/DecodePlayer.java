@@ -52,6 +52,15 @@ public class DecodePlayer implements IPlayer, TextureView.SurfaceTextureListener
         audioFrameQueue = new LinkedBlockingQueue<>();
     }
 
+    // TODO: 2017/2/11 waiting to IDataCache implement, and instead old func.
+    public DecodePlayer(TextureView textureView, IDataCache iDataCache){
+        this.textureView = textureView;
+        this.textureView.setSurfaceTextureListener(this);
+
+    }
+
+
+
     private void addVideoFrame(byte[] data, long timestampMS){
         videoFrameQueue.offer(new AVFrame(data, timestampMS));
     }
