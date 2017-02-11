@@ -1,19 +1,14 @@
 package nat.chung.mediadecoderplayer;
 
 import android.graphics.SurfaceTexture;
-import android.media.AudioFormat;
-import android.media.AudioManager;
 import android.media.AudioTrack;
 import android.media.MediaCodec;
 import android.media.MediaFormat;
-import android.util.Log;
 import android.view.Surface;
 import android.view.TextureView;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.Queue;
-import java.util.concurrent.LinkedBlockingQueue;
 
 import static android.os.SystemClock.sleep;
 
@@ -31,13 +26,11 @@ public class DecodePlayer implements IPlayer, TextureView.SurfaceTextureListener
     private MediaCodec decoder = null;
     private MediaCodec.BufferInfo bufferInfo = null;
     private PLAY_TASK_STATUS playTaskStatus = PLAY_TASK_STATUS.PLAY_TASK_STOPPED;
-    private Queue<AVFrame> videoFrameQueue;
-    private Queue<AVFrame> audioFrameQueue;
     private OnDecodePlayerPlaybackListener onDecodePlayerPlaybackListener;
     private boolean avFrameFinished = false;
     private Surface surface;
     private AudioTrack audioTrack;
-
+    private IDataCache dataCache;
 
     enum PLAY_TASK_STATUS {
         PLAY_TASK_RUNNING,
@@ -45,29 +38,21 @@ public class DecodePlayer implements IPlayer, TextureView.SurfaceTextureListener
         PLAY_TASK_STOPPED
     }
 
-    public DecodePlayer(TextureView textureView){
+    public DecodePlayer(TextureView textureView, IDataCache dataCache){
         this.textureView = textureView;
         this.textureView.setSurfaceTextureListener(this);
-        videoFrameQueue = new LinkedBlockingQueue<>();
-        audioFrameQueue = new LinkedBlockingQueue<>();
+        this.dataCache = dataCache;
     }
 
-    // TODO: 2017/2/11 waiting to IDataCache implement, and instead old func.
-    public DecodePlayer(TextureView textureView, IDataCache iDataCache){
-        this.textureView = textureView;
-        this.textureView.setSurfaceTextureListener(this);
-
-    }
 
 
 
     private void addVideoFrame(byte[] data, long timestampMS){
-        videoFrameQueue.offer(new AVFrame(data, timestampMS));
+        dataCache.pushVideoFrame(new CacheFrame(data, timestampMS));
     }
 
     private void addAudioFrame(byte[] data) {
-        if(audioTrack != null && baseTimestamp > 0)
-            audioFrameQueue.offer(new AVFrame(data, -1));
+        dataCache.pushAudioFrame(new CacheFrame(data, -1));
     }
 
     private void initCodec(String mineType, MediaFormat format) throws  IOException{
@@ -105,8 +90,7 @@ public class DecodePlayer implements IPlayer, TextureView.SurfaceTextureListener
     }
 
     private void cleanAVFrameQueue(){
-        audioFrameQueue.clear();
-        videoFrameQueue.clear();
+        dataCache.clear();
     }
 
     private void startVideoTask(){
@@ -183,7 +167,7 @@ public class DecodePlayer implements IPlayer, TextureView.SurfaceTextureListener
         sleep(SHORT_SLEEP_TME_IN_MS);
     }
 
-    private void videoDecoderEnqueueFrame(AVFrame videoFrame){
+    private void videoDecoderEnqueueFrame(CacheFrame videoFrame){
 
         int inputBufferIndex = decoder.dequeueInputBuffer(timeoutUs);
         if (inputBufferIndex >= 0) {
@@ -209,7 +193,7 @@ public class DecodePlayer implements IPlayer, TextureView.SurfaceTextureListener
 
         playTaskStatus = PLAY_TASK_STATUS.PLAY_TASK_RUNNING;
         while (playTaskStatus == PLAY_TASK_STATUS.PLAY_TASK_RUNNING){
-            AVFrame videoFrame = videoFrameQueue.poll();
+            CacheFrame videoFrame = dataCache.popVideoFrame();
             if(videoFrame == null){
                 frameBufferEmptyHander();
                 continue;
@@ -222,7 +206,7 @@ public class DecodePlayer implements IPlayer, TextureView.SurfaceTextureListener
     private void audioTask() {
 
         while (playTaskStatus == PLAY_TASK_STATUS.PLAY_TASK_RUNNING){
-            AVFrame audioFrame = audioFrameQueue.poll();
+            CacheFrame audioFrame = dataCache.popAudioFrame();
             if(audioFrame == null){
                 sleep(SHORT_SLEEP_TME_IN_MS);
                 continue;
@@ -313,16 +297,6 @@ public class DecodePlayer implements IPlayer, TextureView.SurfaceTextureListener
 
     public void setOnDecodePlayerPlaybackListener(OnDecodePlayerPlaybackListener onDecodePlayerPlaybackListener){
         this.onDecodePlayerPlaybackListener = onDecodePlayerPlaybackListener;
-    }
-
-
-    private class AVFrame{
-        public final byte[] data;
-        public final long timestampMS;
-        public AVFrame(byte[] data, long timestampMS){
-            this.data = data;
-            this.timestampMS = timestampMS;
-        }
     }
 
     public interface OnDecodePlayerPlaybackListener{
