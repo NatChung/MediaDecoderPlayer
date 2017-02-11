@@ -57,11 +57,7 @@ public class MainActivity extends AppCompatActivity {
 
     @SuppressWarnings("unused")
     public void onSQLPlayClicked(View unused){
-        try {
-            player = new DemoPlayer(this, (TextureView)findViewById(R.id.video_view), DB_PATH);
-        } catch (IOException e) {
-            Log.i("ClementDebug", "onSQLPlayClicked: DB file don't exit. ");
-        }
+        // TODO: 2017/2/11 waiting sql cache. 
 
     }
 

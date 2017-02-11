@@ -39,7 +39,7 @@ public class DecodePlayer implements IPlayer, TextureView.SurfaceTextureListener
     private boolean avFrameFinished = false;
     private Surface surface;
     private AudioTrack audioTrack;
-
+    private IDataCache mDataCache;
 
     enum PLAY_TASK_STATUS {
         PLAY_TASK_RUNNING,
@@ -54,54 +54,14 @@ public class DecodePlayer implements IPlayer, TextureView.SurfaceTextureListener
         audioFrameQueue = new LinkedBlockingQueue<>();
     }
 
-    // for SQL
-    public DecodePlayer(TextureView textureView, String sqlPath, Context context){
+    // TODO: 2017/2/11 waiting sql cache 
+    public DecodePlayer(TextureView textureView, IDataCache dataCache){
         this.textureView = textureView;
         this.textureView.setSurfaceTextureListener(this);
-        videoFrameQueue = new LinkedBlockingQueue<>();
-        audioFrameQueue = new LinkedBlockingQueue<>();
-
-        setupAVFormatWithSQL();
-        setupSQLoader(sqlPath, context);
-
-
+        this.mDataCache = dataCache;
+        
     }
-
-    private void setupSQLoader(String path, Context context) {
-        try {
-            SQLoader loader = new SQLoader(path, context);
-            loader.setOnDataLoadListener(new SQLoader.OnDataLoadListener() {
-                @Override
-                public void onVideoRawData(byte[] videoData, int pts, int isKeyFrame) {
-                    addVideoFrame(videoData, pts);
-                }
-
-                @Override
-                public void onAudioRawData(byte[] audioData, int pts) {
-                    addAudioFrame(audioData);
-                }
-
-                @Override
-                public void onFileFinish() {
-                    finishAddAVFrame();
-                }
-            });
-        } catch (IOException e) {
-            Log.i("ClementDebug", "setupSQLoader: SQL file don't exit.");
-        }
-
-    }
-
-    private void setupAVFormatWithSQL() {
-        MediaFormat format = MediaFormat.createVideoFormat("video/avc", 640, 480);
-        format.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420Flexible);
-        try {
-            setupVideoDecoder(MediaFormat.MIMETYPE_VIDEO_AVC, format);
-            setupPCM(AudioManager.STREAM_MUSIC, 8000, AudioFormat.CHANNEL_CONFIGURATION_MONO, AudioFormat.ENCODING_PCM_16BIT, AudioTrack.MODE_STREAM);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+    
 
     private void addVideoFrame(byte[] data, long timestampMS){
         videoFrameQueue.offer(new AVFrame(data, timestampMS));

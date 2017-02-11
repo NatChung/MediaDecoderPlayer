@@ -7,6 +7,7 @@ import android.view.TextureView;
 import java.io.IOException;
 
 import nat.chung.mediadecoderplayer.DecodePlayer;
+import nat.chung.mediadecoderplayer.IDataCache;
 import nat.chung.mediadecoderplayer.IPlayer;
 import nat.chung.mediadecoderplayer.SQLoader;
 import nat.chung.mediadecoderplayer.decorator.SnapshotDecorator;
@@ -27,14 +28,6 @@ public class DemoPlayer implements DecodePlayer.OnDecodePlayerPlaybackListener {
         decodePlayer.setOnDecodePlayerPlaybackListener(this);
         ZoomDecorator zoomDecorator = new ZoomDecorator(context, decodePlayer);
         player = new SnapshotDecorator(zoomDecorator);
-    }
-
-    public DemoPlayer(Context context, TextureView textureView, String sqlPath) throws IOException {
-        DecodePlayer decodePlayer = new DecodePlayer(textureView, sqlPath, context);
-        decodePlayer.setOnDecodePlayerPlaybackListener(this);
-        ZoomDecorator zoomDecorator = new ZoomDecorator(context, decodePlayer);
-        player = new SnapshotDecorator(zoomDecorator);
-
     }
 
     public void stop(){
