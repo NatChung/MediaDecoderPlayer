@@ -22,7 +22,7 @@ public class DemoPlayer implements DecodePlayer.OnDecodePlayerPlaybackListener {
     private SnapshotDecorator player;
 
     public DemoPlayer(Context context, TextureView textureView){
-        DecodePlayer decodePlayer = new DecodePlayer(textureView);
+        DecodePlayer decodePlayer = new DecodePlayer(textureView, null);
         decodePlayer.setOnDecodePlayerPlaybackListener(this);
         ZoomDecorator zoomDecorator = new ZoomDecorator(context, decodePlayer);
         player = new SnapshotDecorator(zoomDecorator);
