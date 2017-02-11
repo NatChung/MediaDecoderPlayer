@@ -8,6 +8,8 @@ import java.io.IOException;
 
 import nat.chung.mediadecoderplayer.DecodePlayer;
 import nat.chung.mediadecoderplayer.IPlayer;
+import nat.chung.mediadecoderplayer.SQLCache.IDataCache;
+import nat.chung.mediadecoderplayer.SQLCache.SQLCache;
 import nat.chung.mediadecoderplayer.decorator.SnapshotDecorator;
 import nat.chung.mediadecoderplayer.decorator.Zoom.ZoomDecorator;
 
@@ -22,7 +24,8 @@ public class DemoPlayer implements DecodePlayer.OnDecodePlayerPlaybackListener {
     private SnapshotDecorator player;
 
     public DemoPlayer(Context context, TextureView textureView){
-        DecodePlayer decodePlayer = new DecodePlayer(textureView, null);
+        IDataCache cache = new SQLCache(context);
+        DecodePlayer decodePlayer = new DecodePlayer(textureView, cache);
         decodePlayer.setOnDecodePlayerPlaybackListener(this);
         ZoomDecorator zoomDecorator = new ZoomDecorator(context, decodePlayer);
         player = new SnapshotDecorator(zoomDecorator);
@@ -40,8 +43,8 @@ public class DemoPlayer implements DecodePlayer.OnDecodePlayerPlaybackListener {
         player.setupVideoDecoder(mineType, format);
     }
 
-    public void addAVFrame(IPlayer.AVFRAME_TYPE type, byte[] data, long timestampMS){
-        player.addAVFrame(type, data, timestampMS);
+    public void addAVFrame(IPlayer.AVFRAME_TYPE type, byte[] data, long timestampMS, int isKeyFrame){
+        player.addAVFrame(type, data, timestampMS, isKeyFrame);
     }
 
     public void snapshot(String savedPath){

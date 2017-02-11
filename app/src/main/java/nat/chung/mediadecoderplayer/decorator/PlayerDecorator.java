@@ -19,9 +19,10 @@ public class PlayerDecorator implements IPlayer {
         this.iPlayer = iPlayer;
     }
 
+
     @Override
-    public void addAVFrame(AVFRAME_TYPE type, byte[] data, long timestamp) {
-        iPlayer.addAVFrame(type, data, timestamp);
+    public void addAVFrame(AVFRAME_TYPE type, byte[] data, long timestampMS, int isKeyFrame) {
+        iPlayer.addAVFrame(type, data, timestampMS, isKeyFrame);
     }
 
     @Override

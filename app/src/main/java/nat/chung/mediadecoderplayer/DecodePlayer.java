@@ -10,6 +10,8 @@ import android.view.TextureView;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
+import nat.chung.mediadecoderplayer.SQLCache.IDataCache;
+
 import static android.os.SystemClock.sleep;
 
 /**
@@ -47,12 +49,12 @@ public class DecodePlayer implements IPlayer, TextureView.SurfaceTextureListener
 
 
 
-    private void addVideoFrame(byte[] data, long timestampMS){
-        dataCache.pushVideoFrame(new CacheFrame(data, timestampMS));
+    private void addVideoFrame(byte[] data, long timestampMS, int isKeyFrame){
+        dataCache.pushVideoFrame(new CacheFrame(data, timestampMS, isKeyFrame));
     }
 
-    private void addAudioFrame(byte[] data) {
-        dataCache.pushAudioFrame(new CacheFrame(data, -1));
+    private void addAudioFrame(byte[] data, long timestampMS, int isKeyFrame) {
+        dataCache.pushAudioFrame(new CacheFrame(data, -1, isKeyFrame));
     }
 
     private void initCodec(String mineType, MediaFormat format) throws  IOException{
@@ -237,13 +239,13 @@ public class DecodePlayer implements IPlayer, TextureView.SurfaceTextureListener
 
     }
 
-    @Override
-    public void addAVFrame(AVFRAME_TYPE type, byte[] data, long timestampMS) {
 
+    @Override
+    public void addAVFrame(AVFRAME_TYPE type, byte[] data, long timestampMS, int isKeyFrame) {
         if(type == AVFRAME_TYPE.VIDEO){
-            addVideoFrame(data, timestampMS);
+            addVideoFrame(data, timestampMS, isKeyFrame);
         }else {
-            addAudioFrame(data);
+            addAudioFrame(data, timestampMS, isKeyFrame);
         }
     }
 
@@ -285,7 +287,7 @@ public class DecodePlayer implements IPlayer, TextureView.SurfaceTextureListener
         releaseCodec();
         releaseAudio();
         cleanAVFrameQueue();
-
+        dataCache.clear();
         baseTimestamp = 0;
         avFrameFinished = false;
     }

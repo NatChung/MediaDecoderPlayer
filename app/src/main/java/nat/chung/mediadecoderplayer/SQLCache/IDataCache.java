@@ -1,4 +1,6 @@
-package nat.chung.mediadecoderplayer;
+package nat.chung.mediadecoderplayer.SQLCache;
+
+import nat.chung.mediadecoderplayer.CacheFrame;
 
 /**
  * Created by starvedia on 2017/2/11.

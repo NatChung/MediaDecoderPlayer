@@ -9,20 +9,27 @@ import android.media.MediaFormat;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.TextureView;
 import android.view.View;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
+import nat.chung.mediadecoderplayer.CacheFrame;
+import nat.chung.mediadecoderplayer.DatabaseLoader;
 import nat.chung.mediadecoderplayer.IPlayer;
 import nat.chung.mediadecoderplayer.R;
+import nat.chung.mediadecoderplayer.SQLCache.SQLCache;
+import nat.chung.mediadecoderplayer.SQLCache.SQLCacheDBHelper;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements DatabaseLoader.OnDataUpdateListener{
 
     private static final String TAG = "MainActivity";
     DemoPlayer player = null;
     boolean endOfExtraFile = true;
+    private final String DB_PATH = "/sdcard/mediacodec/temp.db";
+    private SQLCache cache;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,6 +40,10 @@ public class MainActivity extends AppCompatActivity {
         MainActivity.verifyStoragePermissions(this);
     }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+    }
 
     public void onPlayClicked(@SuppressWarnings("unused") View unused){
 
@@ -49,6 +60,10 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }).start();
+    }
+
+    public void onSQLPlayCLicked(View view){
+        setDataBaseLoader();
     }
 
     public void onStopClicked(@SuppressWarnings("unused") View unused){
@@ -87,7 +102,7 @@ public class MainActivity extends AppCompatActivity {
             if(sampleSize > 0){
                 byte[] data = new byte[sampleSize];
                 inputBuffer.get(data);
-                player.addAVFrame(IPlayer.AVFRAME_TYPE.VIDEO,data, mediaExtractor.getSampleTime()/1000);
+                player.addAVFrame(IPlayer.AVFRAME_TYPE.VIDEO, data, mediaExtractor.getSampleTime()/1000, -1);
                 mediaExtractor.advance();
                 continue;
             }
@@ -113,6 +128,31 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void setDataBaseLoader() {
+        DatabaseLoader loader = new DatabaseLoader(this);
+        loader.setDataUpdateListener(this);
+        try {
+            loader.getVideoDataFromDatabase(DB_PATH);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
 
+    @Override
+    public void onVideoRawData(byte[] data, long pts, int isKeyFrame) {
+        player.addAVFrame(IPlayer.AVFRAME_TYPE.VIDEO, data, pts, isKeyFrame);
+//        cache.pushVideoFrame(new CacheFrame(data, pts, isKeyFrame));
+    }
+
+    @Override
+    public void onAudioRawData(byte[] data, long pts) {
+        player.addAVFrame(IPlayer.AVFRAME_TYPE.AUDIO, data, pts, -1);
+//        cache.pushVideoFrame(new CacheFrame(data, pts, -1));
+    }
+
+    @Override
+    public void onFileFinish() {
+        Log.i("ClementDebug", "onFileFinish: cache count = "+cache.getCount());
+    }
 }

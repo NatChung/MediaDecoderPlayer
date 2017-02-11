@@ -44,12 +44,22 @@
         android:layout_alignParentEnd="true" />
 
     <Button
+        android:text="SQL"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/play_sql"
+        android:onClick="onSQLPlayCLicked"
+        android:layout_above="@+id/play_button"
+        android:layout_alignParentStart="true"
+        android:layout_marginBottom="13dp"/>
+
+    <Button
         android:id="@+id/snapshot_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:onClick="onSnapshotClicked"
         android:text="SNAPSHOT"
         android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerHorizontal="true"/>
 
 </RelativeLayout>
