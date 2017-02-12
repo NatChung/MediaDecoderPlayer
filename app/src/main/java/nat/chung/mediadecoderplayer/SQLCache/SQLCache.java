@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import nat.chung.mediadecoderplayer.CacheFrame;
@@ -17,7 +18,6 @@ public class SQLCache implements IDataCache {
 
     public static final String TABLE_NAME = "FrameQueue";
     public static final String KEY_ID = "_id";
-    // TODO: 2017/2/12 db field init
     public static final String IS_VIDEO = "isVideo";
     public static final String FRAME_DATA = "FrameData";
     public static final String IS_KEYFRAME = "isKeyFrame";
@@ -29,7 +29,9 @@ public class SQLCache implements IDataCache {
                     FRAME_DATA + " Blob NOT NULL, " +
                     IS_KEYFRAME + " INTEGER NOT NULL, " +
                     PTS +  " INTEGER)";
-
+    enum FRAME_TYPE{
+        VIDEO, AUDIO
+    }
     private SQLiteDatabase db;
     private int playIndex = 0;
     public SQLCache(Context context){
@@ -44,28 +46,23 @@ public class SQLCache implements IDataCache {
 
     @Override
     public CacheFrame popVideoFrame() {
-        Cursor cursor = getTableCursor(TABLE_NAME);
-        cursor.moveToPosition(playIndex);
-        CacheFrame result = null;
-        while (cursor.moveToNext()){
-            playIndex++;
-            int isVideo = cursor.getInt(1);
-            if (isVideo==1) {
-                result = new CacheFrame(cursor.getBlob(2), cursor.getInt(4), cursor.getInt(3));
-            }
-        }
-        return result;
+        return getCacheFrame(FRAME_TYPE.VIDEO);
     }
 
     @Override
     public CacheFrame popAudioFrame() {
+        return getCacheFrame(FRAME_TYPE.AUDIO);
+    }
+
+    @Nullable
+    private CacheFrame getCacheFrame(FRAME_TYPE type) {
         Cursor cursor = getTableCursor(TABLE_NAME);
         cursor.moveToPosition(playIndex);
         CacheFrame result = null;
         while (cursor.moveToNext()){
             playIndex++;
             int isVideo = cursor.getInt(1);
-            if (isVideo == 0) {
+            if (isVideo == type.ordinal()) {
                 result = new CacheFrame(cursor.getBlob(2), cursor.getInt(4), cursor.getInt(3));
             }
         }
@@ -74,25 +71,22 @@ public class SQLCache implements IDataCache {
 
     @Override
     public boolean pushVideoFrame(CacheFrame videoFrame) {
-        return putFrameToDB(IPlayer.AVFRAME_TYPE.VIDEO, videoFrame);
+        return putFrameToDB(FRAME_TYPE.VIDEO, videoFrame);
     }
 
     @Override
     public boolean pushAudioFrame(CacheFrame audioFrame) {
-        return putFrameToDB(IPlayer.AVFRAME_TYPE.AUDIO, audioFrame);
+        return putFrameToDB(FRAME_TYPE.AUDIO, audioFrame);
     }
 
-    private boolean putFrameToDB(IPlayer.AVFRAME_TYPE type, CacheFrame inputFrame){
+    private boolean putFrameToDB(FRAME_TYPE type, CacheFrame inputFrame){
+
         ContentValues cv = new ContentValues();
-
-        if (type == IPlayer.AVFRAME_TYPE.VIDEO)
-            cv.put(IS_VIDEO, 1);
-        else
-            cv.put(IS_VIDEO, 0);
-
+        cv.put(IS_VIDEO, type.ordinal());
         cv.put(FRAME_DATA, inputFrame.data);
         cv.put(IS_KEYFRAME, inputFrame.isKeyFrame);
         cv.put(PTS, inputFrame.timestampMS);
+
         long id = db.insert(TABLE_NAME, null, cv);
         return (id == -1) ? true : false;
     }
@@ -103,7 +97,6 @@ public class SQLCache implements IDataCache {
 
     @Override
     public void clear() {
-        Log.i("ClementDebug", "clear cache");
         db.delete(TABLE_NAME, null, null);
     }
 
@@ -112,7 +105,6 @@ public class SQLCache implements IDataCache {
         Cursor cursor = getTableCursor(TABLE_NAME);
         int progressIndex = (int) Math.abs(cursor.getCount()*(progress/100));
         playIndex = findKeyFrameIndex(cursor, progressIndex);
-        Log.i("ClementDebug", "seekTo: final playIndex = "+playIndex);
     }
 
     private int findKeyFrameIndex(Cursor cursor, int progressIndex) {
