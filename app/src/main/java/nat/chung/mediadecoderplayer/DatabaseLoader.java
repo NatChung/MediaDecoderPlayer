@@ -70,7 +70,6 @@ public class DatabaseLoader {
 
     private void loadSDCardPlayBackFromDB2Array()
     {
-        Log.i("ClementDebug", "loadSDCardPlayBackFromDB2Array: ");
         if ((null != pbFileHelper))
         {
             String f[] = { "*" };

@@ -30,7 +30,6 @@ public class MainActivity extends AppCompatActivity implements DatabaseLoader.On
     DemoPlayer player = null;
     boolean endOfExtraFile = true;
     private final String DB_PATH = "/sdcard/mediacodec/temp.db";
-    private SQLCache cache;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -146,13 +145,11 @@ public class MainActivity extends AppCompatActivity implements DatabaseLoader.On
     @Override
     public void onVideoRawData(byte[] data, long pts, int isKeyFrame) {
         player.addAVFrame(IPlayer.AVFRAME_TYPE.VIDEO, data, pts, isKeyFrame);
-//        cache.pushVideoFrame(new CacheFrame(data, pts, isKeyFrame));
     }
 
     @Override
     public void onAudioRawData(byte[] data, long pts) {
         player.addAVFrame(IPlayer.AVFRAME_TYPE.AUDIO, data, pts, -1);
-//        cache.pushVideoFrame(new CacheFrame(data, pts, -1));
     }
 
     @Override
@@ -168,12 +165,12 @@ public class MainActivity extends AppCompatActivity implements DatabaseLoader.On
 
     @Override
     public void onStartTrackingTouch(SeekBar seekBar) {
-        Log.i("ClementDebug", "onStartTrackingTouch: ");
+        player.resume();
     }
 
     @Override
     public void onStopTrackingTouch(SeekBar seekBar) {
-        Log.i("ClementDebug", "onStopTrackingTouch: ");
+        player.pause();
     }
     //==========
 }

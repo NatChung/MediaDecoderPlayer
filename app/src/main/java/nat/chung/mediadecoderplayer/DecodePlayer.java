@@ -38,7 +38,8 @@ public class DecodePlayer implements IPlayer, TextureView.SurfaceTextureListener
     enum PLAY_TASK_STATUS {
         PLAY_TASK_RUNNING,
         PLAY_TASK_STOPING,
-        PLAY_TASK_STOPPED
+        PLAY_TASK_STOPPED,
+        PLAY_TASK_PAUSE
     }
 
     public DecodePlayer(TextureView textureView, IDataCache dataCache){
@@ -284,6 +285,21 @@ public class DecodePlayer implements IPlayer, TextureView.SurfaceTextureListener
     @Override
     public void seekTo(float progress) {
         dataCache.seekTo(progress);
+    }
+
+    @Override
+    public void pause() {
+        if(playTaskStatus != PLAY_TASK_STATUS.PLAY_TASK_RUNNING){
+            playTaskStatus = PLAY_TASK_STATUS.PLAY_TASK_PAUSE;
+        }
+    }
+
+    @Override
+    public void resume() {
+        if(playTaskStatus != PLAY_TASK_STATUS.PLAY_TASK_PAUSE){
+            startVideoTask();
+            startAudioTask();
+        }
     }
 
 

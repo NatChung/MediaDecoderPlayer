@@ -31,6 +31,8 @@ public class DemoPlayer implements DecodePlayer.OnDecodePlayerPlaybackListener {
         player = new SnapshotDecorator(zoomDecorator);
     }
 
+    public void pause(){ player.pause();}
+    public void resume(){ player.resume();}
     public void stop(){
         player.stop();
     }

@@ -38,20 +38,38 @@ public class SQLCache implements IDataCache {
 
     @Override
     public int getCacheCount() {
-        Cursor cursor = db.query(TABLE_NAME, null, null, null, null, null, null);
+        Cursor cursor = getTableCursor(TABLE_NAME);
         return cursor.getCount();
     }
 
     @Override
     public CacheFrame popVideoFrame() {
-        // TODO: 2017/2/12  
-        return null;
+        Cursor cursor = getTableCursor(TABLE_NAME);
+        cursor.moveToPosition(playIndex);
+        CacheFrame result = null;
+        while (cursor.moveToNext()){
+            playIndex++;
+            int isVideo = cursor.getInt(1);
+            if (isVideo==1) {
+                result = new CacheFrame(cursor.getBlob(2), cursor.getInt(4), cursor.getInt(3));
+            }
+        }
+        return result;
     }
 
     @Override
     public CacheFrame popAudioFrame() {
-        // TODO: 2017/2/12  
-        return null;
+        Cursor cursor = getTableCursor(TABLE_NAME);
+        cursor.moveToPosition(playIndex);
+        CacheFrame result = null;
+        while (cursor.moveToNext()){
+            playIndex++;
+            int isVideo = cursor.getInt(1);
+            if (isVideo == 0) {
+                result = new CacheFrame(cursor.getBlob(2), cursor.getInt(4), cursor.getInt(3));
+            }
+        }
+        return result;
     }
 
     @Override
@@ -79,6 +97,10 @@ public class SQLCache implements IDataCache {
         return (id == -1) ? true : false;
     }
 
+    private Cursor getTableCursor(String tableName){
+        return db.query(TABLE_NAME, null, null, null, null, null, null);
+    }
+
     @Override
     public void clear() {
         Log.i("ClementDebug", "clear cache");
@@ -87,8 +109,21 @@ public class SQLCache implements IDataCache {
 
     @Override
     public void seekTo(float progress) {
-        Cursor cursor = db.query(TABLE_NAME, null, null, null, null, null, null);
-        playIndex = (int) Math.abs(cursor.getCount()*(progress/100));
-        Log.i("ClementDebug", "seekTo: playIndex = "+playIndex);
+        Cursor cursor = getTableCursor(TABLE_NAME);
+        int progressIndex = (int) Math.abs(cursor.getCount()*(progress/100));
+        playIndex = findKeyFrameIndex(cursor, progressIndex);
+        Log.i("ClementDebug", "seekTo: final playIndex = "+playIndex);
+    }
+
+    private int findKeyFrameIndex(Cursor cursor, int progressIndex) {
+        cursor.moveToPosition(progressIndex);
+        while (cursor.moveToNext()){
+            progressIndex++;
+            int isVideo = cursor.getInt(1);
+            int isKeyFrame = cursor.getInt(3);
+            if (isVideo == 1 && isKeyFrame == 1)
+                break;
+        }
+        return progressIndex;
     }
 }
