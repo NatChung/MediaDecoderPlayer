@@ -41,6 +41,11 @@ public class PlayerDecorator implements IPlayer {
     }
 
     @Override
+    public void seekTo(float progress) {
+        iPlayer.seekTo(progress);
+    }
+
+    @Override
     public void stop() {
         iPlayer.stop();
     }

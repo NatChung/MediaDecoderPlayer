@@ -8,6 +8,7 @@
     tools:context="com.example.mediadecoderplayer.MainActivity">
 
     <FrameLayout
+        android:id="@+id/video_layout"
         android:layout_width="match_parent"
         android:layout_height="250dp">
         <TextureView
@@ -44,16 +45,6 @@
         android:layout_alignParentEnd="true" />
 
     <Button
-        android:text="SQL"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/play_sql"
-        android:onClick="onSQLPlayCLicked"
-        android:layout_above="@+id/play_button"
-        android:layout_alignParentStart="true"
-        android:layout_marginBottom="13dp"/>
-
-    <Button
         android:id="@+id/snapshot_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -61,5 +52,25 @@
         android:text="SNAPSHOT"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"/>
+
+    <Button
+        android:text="SQL"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/play_sql"
+        android:onClick="onSQLPlayCLicked"
+        android:layout_above="@+id/play_button"
+        android:layout_alignParentStart="true"
+        android:layout_marginBottom="15dp"/>
+
+    <SeekBar
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/seekBar"
+        android:layout_marginBottom="28dp"
+        android:layout_above="@+id/play_sql"
+        android:layout_alignParentEnd="true"
+        android:layout_toEndOf="@+id/point"
+        android:layout_alignParentStart="true"/>
 
 </RelativeLayout>

@@ -14,4 +14,5 @@ public interface IDataCache {
     boolean pushAudioFrame(CacheFrame audioFrame);
     void clear();
     void seekTo(float progress);
+    int getCacheCount();
 }

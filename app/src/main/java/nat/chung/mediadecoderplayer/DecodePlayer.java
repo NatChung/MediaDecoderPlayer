@@ -4,6 +4,7 @@ import android.graphics.SurfaceTexture;
 import android.media.AudioTrack;
 import android.media.MediaCodec;
 import android.media.MediaFormat;
+import android.util.Log;
 import android.view.Surface;
 import android.view.TextureView;
 
@@ -250,7 +251,10 @@ public class DecodePlayer implements IPlayer, TextureView.SurfaceTextureListener
     }
 
     @Override
-    public void finishAddAVFrame() { avFrameFinished = true; }
+    public void finishAddAVFrame() {
+        avFrameFinished = true;
+        Log.i("ClementDebug", "finishAddAVFrame: cache count = "+dataCache.getCacheCount());
+    }
 
     @Override
     public void setupVideoDecoder(String mineType, MediaFormat format) throws IOException {
@@ -277,17 +281,19 @@ public class DecodePlayer implements IPlayer, TextureView.SurfaceTextureListener
         startAudioTask();
     }
 
+    @Override
+    public void seekTo(float progress) {
+        dataCache.seekTo(progress);
+    }
 
 
     @Override
     public void stop() {
-
         stopPlayTask();
         waitForPlayTaskEnd();
         releaseCodec();
         releaseAudio();
         cleanAVFrameQueue();
-        dataCache.clear();
         baseTimestamp = 0;
         avFrameFinished = false;
     }

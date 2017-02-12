@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.TextureView;
 import android.view.View;
+import android.widget.SeekBar;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -23,7 +24,7 @@ import nat.chung.mediadecoderplayer.R;
 import nat.chung.mediadecoderplayer.SQLCache.SQLCache;
 import nat.chung.mediadecoderplayer.SQLCache.SQLCacheDBHelper;
 
-public class MainActivity extends AppCompatActivity implements DatabaseLoader.OnDataUpdateListener{
+public class MainActivity extends AppCompatActivity implements DatabaseLoader.OnDataUpdateListener, SeekBar.OnSeekBarChangeListener{
 
     private static final String TAG = "MainActivity";
     DemoPlayer player = null;
@@ -38,6 +39,13 @@ public class MainActivity extends AppCompatActivity implements DatabaseLoader.On
 
         player = new DemoPlayer(this, (TextureView)findViewById(R.id.video_view));
         MainActivity.verifyStoragePermissions(this);
+
+        setSeekBar();
+    }
+
+    private void setSeekBar() {
+        SeekBar seekBar = (SeekBar) findViewById(R.id.seekBar);
+        seekBar.setOnSeekBarChangeListener(this);
     }
 
     @Override
@@ -131,11 +139,7 @@ public class MainActivity extends AppCompatActivity implements DatabaseLoader.On
     private void setDataBaseLoader() {
         DatabaseLoader loader = new DatabaseLoader(this);
         loader.setDataUpdateListener(this);
-        try {
-            loader.getVideoDataFromDatabase(DB_PATH);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        loader.getVideoDataFromDatabase(DB_PATH);
     }
 
 
@@ -153,6 +157,23 @@ public class MainActivity extends AppCompatActivity implements DatabaseLoader.On
 
     @Override
     public void onFileFinish() {
-        Log.i("ClementDebug", "onFileFinish: cache count = "+cache.getCount());
+        player.dataFinish();
     }
+    
+    // seekbar listener
+    @Override
+    public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+        player.seekTo(i);
+    }
+
+    @Override
+    public void onStartTrackingTouch(SeekBar seekBar) {
+        Log.i("ClementDebug", "onStartTrackingTouch: ");
+    }
+
+    @Override
+    public void onStopTrackingTouch(SeekBar seekBar) {
+        Log.i("ClementDebug", "onStopTrackingTouch: ");
+    }
+    //==========
 }

@@ -51,21 +51,26 @@ public class DatabaseLoader {
     }
 
 
-    public void getVideoDataFromDatabase(String path) throws Exception {
+    public void getVideoDataFromDatabase(String path) {
 
         File s_decFile = new File(path);
         if (s_decFile.exists()) {
             pbFileHelper = new PlaybackFileSQLiteOpenHelper(mContext, path, null, version, PBtables, playBackfieldNames, playBackfieldTypes);
-            loadSDCardPlayBackFromDB2Array();
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    loadSDCardPlayBackFromDB2Array();
+                }
+            }).start();
         }
         else {
-            Exception e = new Exception("File not exit");
-            throw e;
+            Log.i("ClementDebug", "getVideoDataFromDatabase: file don't exit.");
         }
     }
 
     private void loadSDCardPlayBackFromDB2Array()
     {
+        Log.i("ClementDebug", "loadSDCardPlayBackFromDB2Array: ");
         if ((null != pbFileHelper))
         {
             String f[] = { "*" };

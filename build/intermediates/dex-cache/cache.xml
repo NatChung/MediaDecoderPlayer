@@ -3,93 +3,93 @@
 
     <item
         is-multidex="false"
-        jar="/Users/starvedia/Desktop/MediaDecoderPlayer/app/build/intermediates/exploded-aar/com.android.support/support-vector-drawable/25.1.0/jars/classes.jar"
+        jar="/Users/starvedia/Desktop/MediaDecoderPlayer/app/build/intermediates/exploded-aar/com.android.support/support-compat/25.1.1/jars/classes.jar"
         jumboMode="false"
         optimize="true"
         revision="25.0.0"
-        sha1="e79aa3d9a16f8c9f16377c0608de70a8f31e5d80">
-        <dex dex="/Users/starvedia/Desktop/MediaDecoderPlayer/app/build/intermediates/pre-dexed/debug/com.android.support-support-vector-drawable-25.1.0_8ad004bb722b4437f225ef411142e51ecbb4791e.jar" />
+        sha1="02741d05d4b697fba5e279e9881aaa1da0ca7c7f">
+        <dex dex="/Users/starvedia/Desktop/MediaDecoderPlayer/app/build/intermediates/pre-dexed/debug/com.android.support-support-compat-25.1.1_3ee4617dd536f667c53ea13214e264f680f084f7.jar" />
     </item>
     <item
         is-multidex="false"
-        jar="/Users/starvedia/Desktop/Android/android-ndk-r5b/extras/android/m2repository/com/android/support/support-annotations/25.1.0/support-annotations-25.1.0.jar"
-        jumboMode="false"
-        optimize="true"
-        revision="25.0.0"
-        sha1="64cb6b229a8bdfd907bc8dd46839a0053e4c018d">
-        <dex dex="/Users/starvedia/Desktop/MediaDecoderPlayer/app/build/intermediates/pre-dexed/debug/support-annotations-25.1.0_26ec1bb269c8a5764274d8b8c881613f1f5cfcc0.jar" />
-    </item>
-    <item
-        is-multidex="false"
-        jar="/Users/starvedia/Desktop/MediaDecoderPlayer/app/build/intermediates/exploded-aar/com.android.support/support-core-utils/25.1.0/jars/classes.jar"
-        jumboMode="false"
-        optimize="true"
-        revision="25.0.0"
-        sha1="0a0ef86b7fa568a52bf6214a0326ca1f1d618da7">
-        <dex dex="/Users/starvedia/Desktop/MediaDecoderPlayer/app/build/intermediates/pre-dexed/debug/com.android.support-support-core-utils-25.1.0_74109c3a5d5f6767598890afd4b0147c645a1c6b.jar" />
-    </item>
-    <item
-        is-multidex="false"
-        jar="/Users/starvedia/Desktop/MediaDecoderPlayer/app/build/intermediates/exploded-aar/com.android.support/support-v4/25.1.0/jars/classes.jar"
+        jar="/Users/starvedia/Desktop/MediaDecoderPlayer/app/build/intermediates/exploded-aar/com.android.support/support-v4/25.1.1/jars/classes.jar"
         jumboMode="false"
         optimize="true"
         revision="25.0.0"
         sha1="d7c42c80f6509b9ea4db28ca7859ffae08ec5741">
-        <dex dex="/Users/starvedia/Desktop/MediaDecoderPlayer/app/build/intermediates/pre-dexed/debug/com.android.support-support-v4-25.1.0_95df9e2b9c8e7491b72f7dae610d785405d2c7fb.jar" />
+        <dex dex="/Users/starvedia/Desktop/MediaDecoderPlayer/app/build/intermediates/pre-dexed/debug/com.android.support-support-v4-25.1.1_473febfeab03d65969ef1737d1a00faa8f283ad1.jar" />
     </item>
     <item
         is-multidex="false"
-        jar="/Users/starvedia/Desktop/MediaDecoderPlayer/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/25.1.0/jars/classes.jar"
+        jar="/Users/starvedia/Desktop/MediaDecoderPlayer/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/25.1.1/jars/classes.jar"
         jumboMode="false"
         optimize="true"
         revision="25.0.0"
-        sha1="1630658fbc2d222b988603c27b4a4249586fbfe7">
-        <dex dex="/Users/starvedia/Desktop/MediaDecoderPlayer/app/build/intermediates/pre-dexed/debug/com.android.support-appcompat-v7-25.1.0_2cd898552a37d2eccba1927f0199adc4905ffc9b.jar" />
+        sha1="ecb496cc08dd52551fc5ec6db3bc0632e95a89bb">
+        <dex dex="/Users/starvedia/Desktop/MediaDecoderPlayer/app/build/intermediates/pre-dexed/debug/com.android.support-appcompat-v7-25.1.1_50567340a541af33a342d4edfd7bedb58a80c0d7.jar" />
     </item>
     <item
         is-multidex="false"
-        jar="/Users/starvedia/Desktop/MediaDecoderPlayer/app/build/intermediates/exploded-aar/com.android.support/support-core-ui/25.1.0/jars/classes.jar"
+        jar="/Users/starvedia/Desktop/MediaDecoderPlayer/app/build/intermediates/exploded-aar/com.android.support/support-core-utils/25.1.1/jars/classes.jar"
         jumboMode="false"
         optimize="true"
         revision="25.0.0"
-        sha1="aee64634871d88a419d59eb743c1258a60f19700">
-        <dex dex="/Users/starvedia/Desktop/MediaDecoderPlayer/app/build/intermediates/pre-dexed/debug/com.android.support-support-core-ui-25.1.0_6799d7426ec8c53d2cc651804fea75e91578622c.jar" />
+        sha1="0fb891e8f0cfba0513043a7bb357513d229ca2cd">
+        <dex dex="/Users/starvedia/Desktop/MediaDecoderPlayer/app/build/intermediates/pre-dexed/debug/com.android.support-support-core-utils-25.1.1_23a331114175cb346fe548a07035295b23a15cc4.jar" />
     </item>
     <item
         is-multidex="false"
-        jar="/Users/starvedia/Desktop/MediaDecoderPlayer/app/build/intermediates/exploded-aar/com.android.support/support-compat/25.1.0/jars/classes.jar"
+        jar="/Users/starvedia/Desktop/MediaDecoderPlayer/app/build/intermediates/exploded-aar/com.android.support/support-fragment/25.1.1/jars/classes.jar"
         jumboMode="false"
         optimize="true"
         revision="25.0.0"
-        sha1="ca3c7aa31e2726a400a6e552b93cb9f63c9a1e6d">
-        <dex dex="/Users/starvedia/Desktop/MediaDecoderPlayer/app/build/intermediates/pre-dexed/debug/com.android.support-support-compat-25.1.0_8b180e0789a02f0789a5dee0000ba187b81534b8.jar" />
+        sha1="e2719c102dca3a7a5b02ce07f769362da6ddb4ab">
+        <dex dex="/Users/starvedia/Desktop/MediaDecoderPlayer/app/build/intermediates/pre-dexed/debug/com.android.support-support-fragment-25.1.1_59af79db1cb26298a3199d120d9b1b708e4d123c.jar" />
     </item>
     <item
         is-multidex="false"
-        jar="/Users/starvedia/Desktop/MediaDecoderPlayer/app/build/intermediates/exploded-aar/com.android.support/animated-vector-drawable/25.1.0/jars/classes.jar"
+        jar="/Users/starvedia/Desktop/MediaDecoderPlayer/app/build/intermediates/exploded-aar/com.android.support/support-core-ui/25.1.1/jars/classes.jar"
         jumboMode="false"
         optimize="true"
         revision="25.0.0"
-        sha1="6fb6ac3e8d3b9013819920d9ea11f3803c4c0033">
-        <dex dex="/Users/starvedia/Desktop/MediaDecoderPlayer/app/build/intermediates/pre-dexed/debug/com.android.support-animated-vector-drawable-25.1.0_b0bb212eddb546dae665128f56192bdba9f5c913.jar" />
+        sha1="3e04ac8ca644ea7baddf6fdcf72e15c79e9df94a">
+        <dex dex="/Users/starvedia/Desktop/MediaDecoderPlayer/app/build/intermediates/pre-dexed/debug/com.android.support-support-core-ui-25.1.1_21cef41b3a83fc6310c41b09b09e0d0578f05ffe.jar" />
     </item>
     <item
         is-multidex="false"
-        jar="/Users/starvedia/Desktop/MediaDecoderPlayer/app/build/intermediates/exploded-aar/com.android.support/support-fragment/25.1.0/jars/classes.jar"
+        jar="/Users/starvedia/Desktop/MediaDecoderPlayer/app/build/intermediates/exploded-aar/com.android.support/support-media-compat/25.1.1/jars/classes.jar"
         jumboMode="false"
         optimize="true"
         revision="25.0.0"
-        sha1="2a53c4f3518116b8c6aee0e477233f0f7da8616f">
-        <dex dex="/Users/starvedia/Desktop/MediaDecoderPlayer/app/build/intermediates/pre-dexed/debug/com.android.support-support-fragment-25.1.0_14d6dda38bc482221fcef5016af9f98e87197428.jar" />
+        sha1="7bde4c34162092e0a77e7f12dc85ed77c484cf5c">
+        <dex dex="/Users/starvedia/Desktop/MediaDecoderPlayer/app/build/intermediates/pre-dexed/debug/com.android.support-support-media-compat-25.1.1_7708ccbf3cd87545d5e47050d6d56e59a4c4da5f.jar" />
     </item>
     <item
         is-multidex="false"
-        jar="/Users/starvedia/Desktop/MediaDecoderPlayer/app/build/intermediates/exploded-aar/com.android.support/support-media-compat/25.1.0/jars/classes.jar"
+        jar="/Users/starvedia/Desktop/Android/android-ndk-r5b/extras/android/m2repository/com/android/support/support-annotations/25.1.1/support-annotations-25.1.1.jar"
         jumboMode="false"
         optimize="true"
         revision="25.0.0"
-        sha1="f02263e35e52668dd17b73bf961437e3d562b35f">
-        <dex dex="/Users/starvedia/Desktop/MediaDecoderPlayer/app/build/intermediates/pre-dexed/debug/com.android.support-support-media-compat-25.1.0_b1613dad6e56372f00c845ac8fa5825b0e312dd8.jar" />
+        sha1="b59b6ee8d6ecc03e672d253800430343493a6ed8">
+        <dex dex="/Users/starvedia/Desktop/MediaDecoderPlayer/app/build/intermediates/pre-dexed/debug/support-annotations-25.1.1_31aa2bb406e34c5fd4261f4742eb101e7d9270ea.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="/Users/starvedia/Desktop/MediaDecoderPlayer/app/build/intermediates/exploded-aar/com.android.support/animated-vector-drawable/25.1.1/jars/classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="25.0.0"
+        sha1="0d191c1a09e4892d059e5ce749e4ad4e08129e35">
+        <dex dex="/Users/starvedia/Desktop/MediaDecoderPlayer/app/build/intermediates/pre-dexed/debug/com.android.support-animated-vector-drawable-25.1.1_8f0f868542bb02d7e6e0c082341ef7cafbea6423.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="/Users/starvedia/Desktop/MediaDecoderPlayer/app/build/intermediates/exploded-aar/com.android.support/support-vector-drawable/25.1.1/jars/classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="25.0.0"
+        sha1="c03bf57f358aa10d253f21989e93bcf6014b3b17">
+        <dex dex="/Users/starvedia/Desktop/MediaDecoderPlayer/app/build/intermediates/pre-dexed/debug/com.android.support-support-vector-drawable-25.1.1_a4d8837f4ed5288941e0a9178d6d90d598502a89.jar" />
     </item>
 
 </items>

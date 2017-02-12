@@ -51,6 +51,10 @@ public class DemoPlayer implements DecodePlayer.OnDecodePlayerPlaybackListener {
         player.snapshot(savedPath);
     }
 
+    public void seekTo(float progress){
+        player.seekTo(progress);
+    }
+
     @Override
     public void onDidFinishPlay() {
         player.stop();
