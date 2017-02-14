@@ -19,7 +19,7 @@ import static android.os.SystemClock.sleep;
 public class DecodePlayer implements IPlayer, TextureView.SurfaceTextureListener {
 
     private static final String TAG = "DecodePlayer";
-    private static final int timeoutUs = 1000000;
+    private static final int timeoutUs = 10000;
     private static final long SHORT_SLEEP_TME_IN_MS = 10;
 
     private TextureView textureView;
@@ -166,22 +166,29 @@ public class DecodePlayer implements IPlayer, TextureView.SurfaceTextureListener
 
     private void videoDecoderEnqueueFrame(CacheFrame videoFrame){
 
-        int inputBufferIndex = decoder.dequeueInputBuffer(timeoutUs);
-        if (inputBufferIndex >= 0) {
-            ByteBuffer buf[] = decoder.getInputBuffers();
-            buf[inputBufferIndex].put(videoFrame.data);
-            decoder.queueInputBuffer(inputBufferIndex, 0, videoFrame.data.length, videoFrame.timestampMS*1000, 0);
+        while(playTaskStatus == PLAY_TASK_STATUS.PLAY_TASK_RUNNING){
+            int inputBufferIndex = decoder.dequeueInputBuffer(timeoutUs);
+            if (inputBufferIndex >= 0) {
+                ByteBuffer buf[] = decoder.getInputBuffers();
+                buf[inputBufferIndex].put(videoFrame.data);
+                decoder.queueInputBuffer(inputBufferIndex, 0, videoFrame.data.length, videoFrame.timestampMS*1000, 0);
+                break;
+            }
         }
     }
 
     private void videoDecoderDequeueFrame(){
 
-        int outputBufferIndex = decoder.dequeueOutputBuffer(bufferInfo, timeoutUs);
-        if (outputBufferIndex >= 0) {
-            decoder.releaseOutputBuffer(outputBufferIndex, true);
-            startOnDidPlay();
-            sleepForNextFrame(bufferInfo.presentationTimeUs/1000);
+        while (playTaskStatus == PLAY_TASK_STATUS.PLAY_TASK_RUNNING){
+            int outputBufferIndex = decoder.dequeueOutputBuffer(bufferInfo, timeoutUs);
+            if (outputBufferIndex >= 0) {
+                decoder.releaseOutputBuffer(outputBufferIndex, true);
+                startOnDidPlay();
+                sleepForNextFrame(bufferInfo.presentationTimeUs/1000);
+                break;
+            }
         }
+
     }
 
 
