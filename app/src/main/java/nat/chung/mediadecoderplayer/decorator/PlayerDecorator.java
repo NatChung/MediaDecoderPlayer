@@ -6,6 +6,7 @@ import android.view.TextureView;
 import java.io.IOException;
 
 import nat.chung.mediadecoderplayer.IPlayer;
+import nat.chung.mediadecoderplayer.IDataCache;
 
 /**
  * Created by Nat on 2017/1/29.
@@ -14,14 +15,13 @@ import nat.chung.mediadecoderplayer.IPlayer;
 public class PlayerDecorator implements IPlayer {
 
     private IPlayer iPlayer;
-
     public PlayerDecorator(IPlayer iPlayer) {
         this.iPlayer = iPlayer;
     }
 
     @Override
-    public void addAVFrame(AVFRAME_TYPE type, byte[] data, long timestamp) {
-        iPlayer.addAVFrame(type, data, timestamp);
+    public void addAVFrame(AVFRAME_TYPE type, byte[] data, long timestampMS, int isKeyFrame) {
+        iPlayer.addAVFrame(type, data, timestampMS, isKeyFrame);
     }
 
     @Override
@@ -40,8 +40,18 @@ public class PlayerDecorator implements IPlayer {
     }
 
     @Override
+    public void seekTo(float progress) {
+        iPlayer.seekTo(progress);
+    }
+
+    @Override
     public void stop() {
         iPlayer.stop();
+    }
+
+    @Override
+    public void setupCache(IDataCache cache) {
+        iPlayer.setupCache(cache);
     }
 
     @Override

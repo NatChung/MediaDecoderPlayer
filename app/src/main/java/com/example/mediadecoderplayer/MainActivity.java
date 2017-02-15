@@ -4,13 +4,19 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.pm.PackageManager;
 import android.content.res.AssetFileDescriptor;
+import android.media.AudioFormat;
+import android.media.AudioManager;
+import android.media.AudioTrack;
+import android.media.MediaCodecInfo;
 import android.media.MediaExtractor;
 import android.media.MediaFormat;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.TextureView;
 import android.view.View;
+import android.widget.SeekBar;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -18,11 +24,12 @@ import java.nio.ByteBuffer;
 import nat.chung.mediadecoderplayer.IPlayer;
 import nat.chung.mediadecoderplayer.R;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements DatabaseLoader.OnDataUpdateListener, SeekBar.OnSeekBarChangeListener{
 
     private static final String TAG = "MainActivity";
     DemoPlayer player = null;
     boolean endOfExtraFile = true;
+    private final String DB_PATH = "/sdcard/mediacodec/localplayback1min.db";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,8 +38,21 @@ public class MainActivity extends AppCompatActivity {
 
         player = new DemoPlayer(this, (TextureView)findViewById(R.id.video_view));
         MainActivity.verifyStoragePermissions(this);
+
+
+        setSeekBar();
     }
 
+    private void setSeekBar() {
+        SeekBar seekBar = (SeekBar) findViewById(R.id.seekBar);
+        seekBar.setOnSeekBarChangeListener(this);
+
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+    }
 
     public void onPlayClicked(@SuppressWarnings("unused") View unused){
 
@@ -51,13 +71,18 @@ public class MainActivity extends AppCompatActivity {
         }).start();
     }
 
+    public void onSQLPlayCLicked(View view){
+        setDataBaseLoader();
+    }
+
     public void onStopClicked(@SuppressWarnings("unused") View unused){
         endOfExtraFile = true;
         player.stop();
     }
 
     public void onSnapshotClicked(@SuppressWarnings("unused") View unused){
-        player.snapshot("/sdcard/out.png");
+        //player.snapshot("/sdcard/out.png");
+        player.seekTo(0f);
     }
 
 
@@ -87,7 +112,7 @@ public class MainActivity extends AppCompatActivity {
             if(sampleSize > 0){
                 byte[] data = new byte[sampleSize];
                 inputBuffer.get(data);
-                player.addAVFrame(IPlayer.AVFRAME_TYPE.VIDEO,data, mediaExtractor.getSampleTime()/1000);
+                player.addAVFrame(IPlayer.AVFRAME_TYPE.VIDEO, data, mediaExtractor.getSampleTime()/1000, -1);
                 mediaExtractor.advance();
                 continue;
             }
@@ -113,6 +138,46 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void setDataBaseLoader() {
+
+        player.setupCache(new DatabaseLoader(this, DB_PATH));
+        MediaFormat format = MediaFormat.createVideoFormat("video/avc", 1280, 800);
+        format.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420Flexible);
+
+        try {
+            player.setup("video/avc", format);
+            player.setupPCM(AudioManager.STREAM_MUSIC, 8000, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT, AudioTrack.MODE_STREAM);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
 
+    @Override
+    public void onVideoRawData(byte[] data, long pts, int isKeyFrame) {
+        player.addAVFrame(IPlayer.AVFRAME_TYPE.VIDEO, data, pts, isKeyFrame);
+    }
+
+    @Override
+    public void onAudioRawData(byte[] data, long pts) {
+        player.addAVFrame(IPlayer.AVFRAME_TYPE.AUDIO, data, pts, -1);
+    }
+
+    @Override
+    public void onFileFinish() {
+        player.dataFinish();
+    }
+    
+    // seekbar listener
+    @Override
+    public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+        player.seekTo((float)i / 100f);
+    }
+
+    @Override
+    public void onStartTrackingTouch(SeekBar seekBar) { }
+
+    @Override
+    public void onStopTrackingTouch(SeekBar seekBar) {    }
+    //==========
 }

@@ -4,6 +4,8 @@ import android.graphics.SurfaceTexture;
 import android.media.AudioTrack;
 import android.media.MediaCodec;
 import android.media.MediaFormat;
+import android.net.rtp.AudioCodec;
+import android.util.Log;
 import android.view.Surface;
 import android.view.TextureView;
 
@@ -28,9 +30,12 @@ public class DecodePlayer implements IPlayer, TextureView.SurfaceTextureListener
     private PLAY_TASK_STATUS playTaskStatus = PLAY_TASK_STATUS.PLAY_TASK_STOPPED;
     private OnDecodePlayerPlaybackListener onDecodePlayerPlaybackListener;
     private boolean avFrameFinished = false;
-    private Surface surface;
-    private AudioTrack audioTrack;
-    private IDataCache dataCache;
+    private Surface surface = null;
+    private AudioTrack audioTrack = null;
+    private IDataCache dataCache = null;
+    private long lastSeekToTimestamp = System.currentTimeMillis();
+    private final long SEEKTO_DURATION_MS = 500;
+
 
     enum PLAY_TASK_STATUS {
         PLAY_TASK_RUNNING,
@@ -38,18 +43,17 @@ public class DecodePlayer implements IPlayer, TextureView.SurfaceTextureListener
         PLAY_TASK_STOPPED
     }
 
-    public DecodePlayer(TextureView textureView, IDataCache dataCache){
+    public DecodePlayer(TextureView textureView){
         this.textureView = textureView;
         this.textureView.setSurfaceTextureListener(this);
-        this.dataCache = dataCache;
     }
 
-    private void addVideoFrame(byte[] data, long timestampMS){
-        dataCache.pushVideoFrame(new CacheFrame(data, timestampMS));
+    private void addVideoFrame(byte[] data, long timestampMS, int isKeyFrame){
+        dataCache.pushVideoFrame(new CacheFrame(data, timestampMS, isKeyFrame));
     }
 
-    private void addAudioFrame(byte[] data) {
-        dataCache.pushAudioFrame(new CacheFrame(data, -1));
+    private void addAudioFrame(byte[] data, long timestampMS, int isKeyFrame) {
+        dataCache.pushAudioFrame(new CacheFrame(data, timestampMS, isKeyFrame));
     }
 
     private void initCodec(String mineType, MediaFormat format) throws  IOException{
@@ -61,8 +65,7 @@ public class DecodePlayer implements IPlayer, TextureView.SurfaceTextureListener
 
     private void initAudioTrack(int streamType, int sampleRateInHz, int channelConfig, int audioFormat, int mode){
         int minBufferSize = AudioTrack.getMinBufferSize(sampleRateInHz, channelConfig, audioFormat);
-        audioTrack = new AudioTrack(streamType, sampleRateInHz, channelConfig, audioFormat, minBufferSize << 2, mode);
-        audioTrack.play();
+        audioTrack = new AudioTrack(streamType, sampleRateInHz, channelConfig, audioFormat, minBufferSize * 10, mode);
     }
 
     private void releaseCodec(){
@@ -146,6 +149,7 @@ public class DecodePlayer implements IPlayer, TextureView.SurfaceTextureListener
 
         if(baseTimestamp == 0){
             baseTimestamp = System.currentTimeMillis() - timestamp;
+            audioTrack.play();
         }
 
         while((baseTimestamp + timestamp) > System.currentTimeMillis() && (playTaskStatus == PLAY_TASK_STATUS.PLAY_TASK_RUNNING)) {
@@ -177,47 +181,75 @@ public class DecodePlayer implements IPlayer, TextureView.SurfaceTextureListener
         }
     }
 
-    private void videoDecoderDequeueFrame(){
+    private void videoDecoderDequeueFrameToResumeTimestamp(){
 
-        while (playTaskStatus == PLAY_TASK_STATUS.PLAY_TASK_RUNNING){
-            int outputBufferIndex = decoder.dequeueOutputBuffer(bufferInfo, timeoutUs);
-            if (outputBufferIndex >= 0) {
+        int outputBufferIndex = decoder.dequeueOutputBuffer(bufferInfo, timeoutUs);
+        if (outputBufferIndex >= 0) {
+            if((bufferInfo.presentationTimeUs/1000) == resumeTimestamp){
+                baseTimestamp = 0;
+                resumeTimestamp = 0;
                 decoder.releaseOutputBuffer(outputBufferIndex, true);
-                startOnDidPlay();
-                sleepForNextFrame(bufferInfo.presentationTimeUs/1000);
-                break;
+            }else{
+                decoder.releaseOutputBuffer(outputBufferIndex, false);
             }
         }
+    }
 
+    private void videoDecoderDequeueFrame(){
+
+        int outputBufferIndex = decoder.dequeueOutputBuffer(bufferInfo, timeoutUs);
+        if (outputBufferIndex >= 0) {
+            sleepForNextFrame(bufferInfo.presentationTimeUs/1000);
+            decoder.releaseOutputBuffer(outputBufferIndex, true);
+            startOnDidPlay();
+        }
     }
 
 
     private long baseTimestamp = 0;
+    private long resumeTimestamp = 0;
     private void videoTask()  {
 
         playTaskStatus = PLAY_TASK_STATUS.PLAY_TASK_RUNNING;
         while (playTaskStatus == PLAY_TASK_STATUS.PLAY_TASK_RUNNING){
-            CacheFrame videoFrame = dataCache.popVideoFrame();
-            if(videoFrame == null){
-                frameBufferEmptyHander();
-                continue;
+
+            synchronized(this){
+                CacheFrame videoFrame = dataCache.popVideoFrame();
+                if(videoFrame == null){
+                    frameBufferEmptyHander();
+                    continue;
+                }
+                videoDecoderEnqueueFrame(videoFrame);
             }
-            videoDecoderEnqueueFrame(videoFrame);
-            videoDecoderDequeueFrame();
+
+            if(resumeTimestamp > 0){
+                videoDecoderDequeueFrameToResumeTimestamp();
+            }else{
+                videoDecoderDequeueFrame();
+            }
+
         }
         playTaskStatus = PLAY_TASK_STATUS.PLAY_TASK_STOPPED;
     }
+
+    G711UCodec G711 = new G711UCodec();
     private void audioTask() {
 
         while (playTaskStatus == PLAY_TASK_STATUS.PLAY_TASK_RUNNING){
-            CacheFrame audioFrame = dataCache.popAudioFrame();
-            if(audioFrame == null){
-                sleep(SHORT_SLEEP_TME_IN_MS);
-                continue;
-            }
-            audioTrack.write(audioFrame.data, 0, audioFrame.data.length);
-        }
 
+            synchronized(this){
+                CacheFrame audioFrame = dataCache.popAudioFrame();
+                if(audioFrame == null ){
+                    continue;
+                }
+
+                short[] audioData = new short [audioFrame.data.length ];
+                G711.decode(audioData, audioFrame.data, audioFrame.data.length , 0);
+                audioTrack.write(audioData, 0, audioData.length);
+            }
+
+            sleep(SHORT_SLEEP_TME_IN_MS*8);
+        }
     }
 
     @Override
@@ -241,18 +273,20 @@ public class DecodePlayer implements IPlayer, TextureView.SurfaceTextureListener
 
     }
 
-    @Override
-    public void addAVFrame(AVFRAME_TYPE type, byte[] data, long timestampMS) {
 
+    @Override
+    public void addAVFrame(AVFRAME_TYPE type, byte[] data, long timestampMS, int isKeyFrame) {
         if(type == AVFRAME_TYPE.VIDEO){
-            addVideoFrame(data, timestampMS);
+            addVideoFrame(data, timestampMS, isKeyFrame);
         }else {
-            addAudioFrame(data);
+            addAudioFrame(data, timestampMS, isKeyFrame);
         }
     }
 
     @Override
-    public void finishAddAVFrame() { avFrameFinished = true; }
+    public void finishAddAVFrame() {
+        avFrameFinished = true;
+    }
 
     @Override
     public void setupVideoDecoder(String mineType, MediaFormat format) throws IOException {
@@ -279,19 +313,51 @@ public class DecodePlayer implements IPlayer, TextureView.SurfaceTextureListener
         startAudioTask();
     }
 
+    @Override
+    public void seekTo(final float progress) {
 
+        long diff = System.currentTimeMillis() - lastSeekToTimestamp;
+        if(diff < SEEKTO_DURATION_MS){
+            return;
+        }
+
+        lastSeekToTimestamp = System.currentTimeMillis();
+
+        new Thread(new Runnable() {
+            public void run() {
+                synchronized (this){
+                    dataCache.seekTo(progress);
+
+                    CacheFrame videoFrame = dataCache.popVideoFrame();
+                    videoDecoderEnqueueFrame(videoFrame);
+                    int outputBufferIndex = decoder.dequeueOutputBuffer(bufferInfo, timeoutUs);
+                    if (outputBufferIndex >= 0) {
+                        decoder.releaseOutputBuffer(outputBufferIndex, false);
+                    }
+                    resumeTimestamp = videoFrame.timestampMS;
+
+                    audioTrack.flush();
+                    audioTrack.stop();
+                    audioTrack.play();
+                }
+            }
+        }).start();
+    }
 
     @Override
     public void stop() {
-
         stopPlayTask();
         waitForPlayTaskEnd();
         releaseCodec();
         releaseAudio();
         cleanAVFrameQueue();
-
         baseTimestamp = 0;
         avFrameFinished = false;
+    }
+
+    @Override
+    public void setupCache(IDataCache cache) {
+        dataCache = cache;
     }
 
     @Override

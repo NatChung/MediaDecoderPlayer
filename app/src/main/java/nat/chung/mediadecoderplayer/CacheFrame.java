@@ -7,8 +7,10 @@ package nat.chung.mediadecoderplayer;
 public class CacheFrame {
     public final byte[] data;
     public final long timestampMS;
-    public CacheFrame(byte[] data, long timestampMS){
+    public final int isKeyFrame;
+    public CacheFrame(byte[] data, long timestampMS, int isKeyFrame){
         this.data = data;
         this.timestampMS = timestampMS;
+        this.isKeyFrame = isKeyFrame;
     }
 }

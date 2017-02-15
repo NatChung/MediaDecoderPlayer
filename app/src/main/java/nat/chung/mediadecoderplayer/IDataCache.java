@@ -1,8 +1,9 @@
 package nat.chung.mediadecoderplayer;
 
 /**
- * Created by Nat on 2017/2/11.
+ * Created by starvedia on 2017/2/11.
  */
+
 
 public interface IDataCache {
     CacheFrame popVideoFrame();
@@ -11,4 +12,5 @@ public interface IDataCache {
     boolean pushAudioFrame(CacheFrame audioFrame);
     void clear();
     void seekTo(float progress);
+    int getCacheCount();
 }
