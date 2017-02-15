@@ -170,11 +170,14 @@ public class DecodePlayer implements IPlayer, TextureView.SurfaceTextureListener
 
     private void videoDecoderEnqueueFrame(CacheFrame videoFrame){
 
-        int inputBufferIndex = decoder.dequeueInputBuffer(timeoutUs);
-        if (inputBufferIndex >= 0) {
-            ByteBuffer buf[] = decoder.getInputBuffers();
-            buf[inputBufferIndex].put(videoFrame.data);
-            decoder.queueInputBuffer(inputBufferIndex, 0, videoFrame.data.length, videoFrame.timestampMS*1000, 0);
+        while(playTaskStatus == PLAY_TASK_STATUS.PLAY_TASK_RUNNING){
+            int inputBufferIndex = decoder.dequeueInputBuffer(timeoutUs);
+            if (inputBufferIndex >= 0) {
+                ByteBuffer buf[] = decoder.getInputBuffers();
+                buf[inputBufferIndex].put(videoFrame.data);
+                decoder.queueInputBuffer(inputBufferIndex, 0, videoFrame.data.length, videoFrame.timestampMS*1000, 0);
+                break;
+            }
         }
     }
 

@@ -61,8 +61,13 @@
         jumboMode="true"
         optimize="true"
         revision="25.0.0"
+<<<<<<< HEAD
         sha1="7bde4c34162092e0a77e7f12dc85ed77c484cf5c">
         <dex dex="/Users/nat/Desktop/MediaDecoderPlayerWithSeek/app/build/intermediates/transforms/dex/debug/folders/1000/10/com.android.support-support-media-compat-25.1.1_7ca15e2078a2f7dae0bee026afc39310a3141326/classes.dex" />
+=======
+        sha1="be5989acde3c44808861ead0acdaf8cbe07c7f6c">
+        <dex dex="/Users/nat/Desktop/MediaDecoderPlayer/app/build/intermediates/transforms/dex/debug/folders/1000/10/instant-run-bootstrap_a55b16474dc3c623ad19cd78f6feae4d31d53162/classes.dex" />
+>>>>>>> fdc4407be159478b18d4fb4dff4d5f391a6c88d1
     </item>
     <item
         is-multidex="true"
@@ -106,8 +111,13 @@
         jumboMode="true"
         optimize="true"
         revision="25.0.0"
+<<<<<<< HEAD
         sha1="c03bf57f358aa10d253f21989e93bcf6014b3b17">
         <dex dex="/Users/nat/Desktop/MediaDecoderPlayerWithSeek/app/build/intermediates/transforms/dex/debug/folders/1000/10/com.android.support-support-vector-drawable-25.1.1_05a116d081f2eab823a51c8cd1d3ce5785515243/classes.dex" />
+=======
+        sha1="0cb1dd8638329adbcf3392f68662233a6141175b">
+        <dex dex="/Users/nat/Desktop/MediaDecoderPlayer/app/build/intermediates/transforms/dex/debug/folders/1000/10/instant-run_97f2c46c8946cc359ef2e048636207f59bb65e46/classes.dex" />
+>>>>>>> fdc4407be159478b18d4fb4dff4d5f391a6c88d1
     </item>
 
 </items>
