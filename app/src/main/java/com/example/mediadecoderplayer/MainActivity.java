@@ -10,6 +10,7 @@ import android.media.AudioTrack;
 import android.media.MediaCodecInfo;
 import android.media.MediaExtractor;
 import android.media.MediaFormat;
+import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -105,6 +106,7 @@ public class MainActivity extends AppCompatActivity implements DatabaseLoader.On
             }
         }
         player.setup(mine_type, format);
+        player.setupPCM(AudioManager.STREAM_MUSIC, 8000, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT, AudioTrack.MODE_STREAM);
 
         ByteBuffer inputBuffer = ByteBuffer.allocate(640*380*3);
         while (endOfExtraFile == false) {
@@ -178,6 +180,14 @@ public class MainActivity extends AppCompatActivity implements DatabaseLoader.On
     public void onStartTrackingTouch(SeekBar seekBar) { }
 
     @Override
-    public void onStopTrackingTouch(SeekBar seekBar) {    }
+    public void onStopTrackingTouch(final SeekBar seekBar) {
+
+        new Handler().postDelayed(new Runnable(){
+            public void run(){
+                player.seekTo((float)seekBar.getProgress() / 100f);
+            }
+        }, 500);
+        
+    }
     //==========
 }

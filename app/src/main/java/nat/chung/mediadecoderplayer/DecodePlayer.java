@@ -11,6 +11,8 @@ import android.view.TextureView;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.Queue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import static android.os.SystemClock.sleep;
 
@@ -36,6 +38,9 @@ public class DecodePlayer implements IPlayer, TextureView.SurfaceTextureListener
     private long lastSeekToTimestamp = System.currentTimeMillis();
     private final long SEEKTO_DURATION_MS = 500;
 
+    private Queue<CacheFrame> audioQueue = new LinkedBlockingQueue<>();
+    private Queue<CacheFrame> videoQueue = new LinkedBlockingQueue<>();
+
 
     enum PLAY_TASK_STATUS {
         PLAY_TASK_RUNNING,
@@ -49,11 +54,22 @@ public class DecodePlayer implements IPlayer, TextureView.SurfaceTextureListener
     }
 
     private void addVideoFrame(byte[] data, long timestampMS, int isKeyFrame){
-        dataCache.pushVideoFrame(new CacheFrame(data, timestampMS, isKeyFrame));
+
+        if(dataCache == null){
+            videoQueue.offer(new CacheFrame(data, timestampMS, isKeyFrame));
+        }else{
+            dataCache.pushVideoFrame(new CacheFrame(data, timestampMS, isKeyFrame));
+        }
+
     }
 
     private void addAudioFrame(byte[] data, long timestampMS, int isKeyFrame) {
-        dataCache.pushAudioFrame(new CacheFrame(data, timestampMS, isKeyFrame));
+        if(dataCache == null){
+            audioQueue.offer(new CacheFrame(data, timestampMS, isKeyFrame));
+        }else{
+            dataCache.pushAudioFrame(new CacheFrame(data, timestampMS, isKeyFrame));
+        }
+
     }
 
     private void initCodec(String mineType, MediaFormat format) throws  IOException{
@@ -90,7 +106,13 @@ public class DecodePlayer implements IPlayer, TextureView.SurfaceTextureListener
     }
 
     private void cleanAVFrameQueue(){
-        dataCache.clear();
+
+        if(dataCache == null){
+            audioQueue.clear();
+            videoQueue.clear();
+        }else{
+            dataCache.clear();
+        }
     }
 
     private void startVideoTask(){
@@ -205,6 +227,10 @@ public class DecodePlayer implements IPlayer, TextureView.SurfaceTextureListener
         }
     }
 
+    private CacheFrame popVideoFrame() {
+        return (dataCache == null) ? videoQueue.poll() : dataCache.popVideoFrame();
+    }
+
 
     private long baseTimestamp = 0;
     private long resumeTimestamp = 0;
@@ -214,7 +240,7 @@ public class DecodePlayer implements IPlayer, TextureView.SurfaceTextureListener
         while (playTaskStatus == PLAY_TASK_STATUS.PLAY_TASK_RUNNING){
 
             synchronized(this){
-                CacheFrame videoFrame = dataCache.popVideoFrame();
+                CacheFrame videoFrame = popVideoFrame();
                 if(videoFrame == null){
                     frameBufferEmptyHander();
                     continue;
@@ -232,23 +258,32 @@ public class DecodePlayer implements IPlayer, TextureView.SurfaceTextureListener
         playTaskStatus = PLAY_TASK_STATUS.PLAY_TASK_STOPPED;
     }
 
+    private CacheFrame popAudioFrame() {
+        return (dataCache == null) ? audioQueue.poll() : dataCache.popAudioFrame();
+    }
+
     G711UCodec G711 = new G711UCodec();
     private void audioTask() {
 
         while (playTaskStatus == PLAY_TASK_STATUS.PLAY_TASK_RUNNING){
 
             synchronized(this){
-                CacheFrame audioFrame = dataCache.popAudioFrame();
+                CacheFrame audioFrame = popAudioFrame();
                 if(audioFrame == null ){
                     continue;
                 }
 
-                short[] audioData = new short [audioFrame.data.length ];
-                G711.decode(audioData, audioFrame.data, audioFrame.data.length , 0);
-                audioTrack.write(audioData, 0, audioData.length);
+                if(dataCache == null){
+                    audioTrack.write(audioFrame.data, 0, audioFrame.data.length);
+                }else{
+                    short[] audioData = new short [audioFrame.data.length ];
+                    G711.decode(audioData, audioFrame.data, audioFrame.data.length , 0);
+                    audioTrack.write(audioData, 0, audioData.length);
+                }
+
             }
 
-            sleep(SHORT_SLEEP_TME_IN_MS*8);
+            sleep(SHORT_SLEEP_TME_IN_MS*9);
         }
     }
 
@@ -316,12 +351,15 @@ public class DecodePlayer implements IPlayer, TextureView.SurfaceTextureListener
     @Override
     public void seekTo(final float progress) {
 
+        if(dataCache == null) return;
+
         long diff = System.currentTimeMillis() - lastSeekToTimestamp;
         if(diff < SEEKTO_DURATION_MS){
             return;
         }
-
         lastSeekToTimestamp = System.currentTimeMillis();
+
+
 
         new Thread(new Runnable() {
             public void run() {
