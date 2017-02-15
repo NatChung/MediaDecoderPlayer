@@ -29,7 +29,7 @@ public class MainActivity extends AppCompatActivity implements DatabaseLoader.On
     private static final String TAG = "MainActivity";
     DemoPlayer player = null;
     boolean endOfExtraFile = true;
-    private final String DB_PATH = "/sdcard/mediacodec/temp.db";
+    private final String DB_PATH = "/sdcard/mediacodec/localplayback1min.db";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -141,12 +141,12 @@ public class MainActivity extends AppCompatActivity implements DatabaseLoader.On
     private void setDataBaseLoader() {
 
         player.setupCache(new DatabaseLoader(this, DB_PATH));
-        MediaFormat format = MediaFormat.createVideoFormat("video/avc", 640, 480);
+        MediaFormat format = MediaFormat.createVideoFormat("video/avc", 1280, 800);
         format.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420Flexible);
 
         try {
             player.setup("video/avc", format);
-            player.setupPCM(AudioManager.STREAM_MUSIC, 8000, AudioFormat.CHANNEL_CONFIGURATION_MONO, AudioFormat.ENCODING_PCM_16BIT, AudioTrack.MODE_STREAM);
+            player.setupPCM(AudioManager.STREAM_MUSIC, 8000, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT, AudioTrack.MODE_STREAM);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -171,7 +171,7 @@ public class MainActivity extends AppCompatActivity implements DatabaseLoader.On
     // seekbar listener
     @Override
     public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-        player.seekTo(0);
+        player.seekTo((float)i / 100f);
     }
 
     @Override

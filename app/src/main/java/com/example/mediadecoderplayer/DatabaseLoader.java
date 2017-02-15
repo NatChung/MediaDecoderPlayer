@@ -18,18 +18,21 @@ import nat.chung.mediadecoderplayer.IDataCache;
 public class DatabaseLoader implements IDataCache {
 
     private static final String TAG = "DatabaseLoader";
-    Cursor videoCursor;
+    Cursor videoCursor, audioCursor;
 
     @Override
     public CacheFrame popVideoFrame() {
         if (videoCursor.moveToNext()){
-            return new CacheFrame(videoCursor.getBlob(5), videoCursor.getLong(3), videoCursor.getInt(1));
+            return new CacheFrame(videoCursor.getBlob(3), videoCursor.getLong(2), videoCursor.getInt(4));
         }
         return null;
     }
 
     @Override
     public CacheFrame popAudioFrame() {
+        if(audioCursor.moveToNext()){
+            return new CacheFrame(audioCursor.getBlob(3), audioCursor.getLong(2), 0);
+        }
         return null;
     }
 
@@ -44,14 +47,19 @@ public class DatabaseLoader implements IDataCache {
     }
 
     @Override
-    public void clear() {
-
-    }
+    public void clear() { }
 
     @Override
     public void seekTo(float progress) {
+        videoCursor.moveToPosition((int)(videoCursor.getCount() * progress));
+        while (videoCursor.getInt(4)!=1 && videoCursor.moveToPrevious()){}
 
-        videoCursor.moveToFirst();
+        long videoPts = videoCursor.getLong(2);
+
+        audioCursor.moveToFirst();
+        while (audioCursor.getLong(2) < videoPts && audioCursor.moveToNext()){}
+
+        audioCursor.moveToPrevious();
         videoCursor.moveToPrevious();
     }
 
@@ -66,7 +74,6 @@ public class DatabaseLoader implements IDataCache {
         void onFileFinish();
     }
 
-    public final String SD_PLAYBACKFILE = "/sdcard/mediacodec/temp1280.db";
     public static PlaybackFileSQLiteOpenHelper pbFileHelper = null;
     private final String PBtables[] = { "Recording", "ESFrame"};
     private final int version = 1;
@@ -93,33 +100,10 @@ public class DatabaseLoader implements IDataCache {
         File s_decFile = new File(path);
         if (s_decFile.exists()) {
             pbFileHelper = new PlaybackFileSQLiteOpenHelper(context, path, null, version, PBtables, playBackfieldNames, playBackfieldTypes);
-            videoCursor = pbFileHelper.select2(PBtables[1], new String[]{"*"}, "isVideo=1", null, "ptsms", null);
-        }
-        else {
+            videoCursor = pbFileHelper.select2(PBtables[0], new String[]{"*"}, "IsVideo=1", null, "PtsTimeMs", null);
+            audioCursor = pbFileHelper.select2(PBtables[0], new String[]{"*"}, "IsVideo=0", null, "PtsTimeMs", null);
+        } else {
             Log.i("ClementDebug", "getVideoDataFromDatabase: file don't exit.");
         }
-    }
-    public void setDataUpdateListener(OnDataUpdateListener onDataUpdateListener){
-        this.onDataUpdateListener = onDataUpdateListener;
-    }
-
-    private void loadSDCardPlayBackFromDB2Array()
-    {
-        if (null != pbFileHelper)
-        {
-            String f[] = { "*" };
-            Cursor c = pbFileHelper.select(PBtables[1], f, null, null, null, null, null);
-            while (c.moveToNext())
-            {
-                int isVideo = c.getInt(2);
-                if (isVideo == 1)
-                    onDataUpdateListener.onVideoRawData(c.getBlob(5), c.getLong(3), c.getInt(1));
-                else
-                    onDataUpdateListener.onAudioRawData(c.getBlob(5), c.getLong(3));
-            }
-            Log.i("ClementDebug", "loadSDCardPlayBackFromDB2Array: read source db done");
-            onDataUpdateListener.onFileFinish();
-        }
-
     }
 }

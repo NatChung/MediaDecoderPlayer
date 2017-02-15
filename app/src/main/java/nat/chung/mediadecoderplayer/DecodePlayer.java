@@ -4,6 +4,7 @@ import android.graphics.SurfaceTexture;
 import android.media.AudioTrack;
 import android.media.MediaCodec;
 import android.media.MediaFormat;
+import android.net.rtp.AudioCodec;
 import android.util.Log;
 import android.view.Surface;
 import android.view.TextureView;
@@ -29,11 +30,11 @@ public class DecodePlayer implements IPlayer, TextureView.SurfaceTextureListener
     private PLAY_TASK_STATUS playTaskStatus = PLAY_TASK_STATUS.PLAY_TASK_STOPPED;
     private OnDecodePlayerPlaybackListener onDecodePlayerPlaybackListener;
     private boolean avFrameFinished = false;
-    private Surface surface;
-    private AudioTrack audioTrack;
-    private IDataCache dataCache;
+    private Surface surface = null;
+    private AudioTrack audioTrack = null;
+    private IDataCache dataCache = null;
     private long lastSeekToTimestamp = System.currentTimeMillis();
-    private final long SEEKTO_DURATION_MS = 300;
+    private final long SEEKTO_DURATION_MS = 500;
 
 
     enum PLAY_TASK_STATUS {
@@ -64,8 +65,7 @@ public class DecodePlayer implements IPlayer, TextureView.SurfaceTextureListener
 
     private void initAudioTrack(int streamType, int sampleRateInHz, int channelConfig, int audioFormat, int mode){
         int minBufferSize = AudioTrack.getMinBufferSize(sampleRateInHz, channelConfig, audioFormat);
-        audioTrack = new AudioTrack(streamType, sampleRateInHz, channelConfig, audioFormat, minBufferSize << 2, mode);
-        audioTrack.play();
+        audioTrack = new AudioTrack(streamType, sampleRateInHz, channelConfig, audioFormat, minBufferSize * 10, mode);
     }
 
     private void releaseCodec(){
@@ -149,6 +149,7 @@ public class DecodePlayer implements IPlayer, TextureView.SurfaceTextureListener
 
         if(baseTimestamp == 0){
             baseTimestamp = System.currentTimeMillis() - timestamp;
+            audioTrack.play();
         }
 
         while((baseTimestamp + timestamp) > System.currentTimeMillis() && (playTaskStatus == PLAY_TASK_STATUS.PLAY_TASK_RUNNING)) {
@@ -207,7 +208,7 @@ public class DecodePlayer implements IPlayer, TextureView.SurfaceTextureListener
     private void videoTask()  {
 
         playTaskStatus = PLAY_TASK_STATUS.PLAY_TASK_RUNNING;
-        while (playTaskStatus != PLAY_TASK_STATUS.PLAY_TASK_STOPING){
+        while (playTaskStatus == PLAY_TASK_STATUS.PLAY_TASK_RUNNING){
 
             synchronized(this){
                 CacheFrame videoFrame = dataCache.popVideoFrame();
@@ -228,16 +229,23 @@ public class DecodePlayer implements IPlayer, TextureView.SurfaceTextureListener
         playTaskStatus = PLAY_TASK_STATUS.PLAY_TASK_STOPPED;
     }
 
-
+    G711UCodec G711 = new G711UCodec();
     private void audioTask() {
 
-        while (playTaskStatus != PLAY_TASK_STATUS.PLAY_TASK_STOPING){
-            CacheFrame audioFrame = dataCache.popAudioFrame();
-            if(audioFrame == null ){
-                sleep(SHORT_SLEEP_TME_IN_MS);
-                continue;
+        while (playTaskStatus == PLAY_TASK_STATUS.PLAY_TASK_RUNNING){
+
+            synchronized(this){
+                CacheFrame audioFrame = dataCache.popAudioFrame();
+                if(audioFrame == null ){
+                    continue;
+                }
+
+                short[] audioData = new short [audioFrame.data.length ];
+                G711.decode(audioData, audioFrame.data, audioFrame.data.length , 0);
+                audioTrack.write(audioData, 0, audioData.length);
             }
-            audioTrack.write(audioFrame.data, 0, audioFrame.data.length);
+
+            sleep(SHORT_SLEEP_TME_IN_MS*8);
         }
     }
 
@@ -316,6 +324,7 @@ public class DecodePlayer implements IPlayer, TextureView.SurfaceTextureListener
             public void run() {
                 synchronized (this){
                     dataCache.seekTo(progress);
+
                     CacheFrame videoFrame = dataCache.popVideoFrame();
                     videoDecoderEnqueueFrame(videoFrame);
                     int outputBufferIndex = decoder.dequeueOutputBuffer(bufferInfo, timeoutUs);
@@ -323,6 +332,10 @@ public class DecodePlayer implements IPlayer, TextureView.SurfaceTextureListener
                         decoder.releaseOutputBuffer(outputBufferIndex, false);
                     }
                     resumeTimestamp = videoFrame.timestampMS;
+
+                    audioTrack.flush();
+                    audioTrack.stop();
+                    audioTrack.play();
                 }
             }
         }).start();

@@ -23,7 +23,6 @@ public class SQLCacheDBHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
-        int i = Log.i(TAG, "SQLCacheDBHelper onCreate");
         sqLiteDatabase.execSQL(SQLCache.CREATE_VIDEO_TABLE);
         sqLiteDatabase.execSQL(SQLCache.CREATE_AUDIO_TABLE);
     }
@@ -46,7 +45,6 @@ public class SQLCacheDBHelper extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {
         Log.i(TAG,"SQLCacheDBHelper");
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + SQLCache.TABLE_VIDEO);
-        // 呼叫onCreate建立新版的表格
         onCreate(sqLiteDatabase);
     }
 
