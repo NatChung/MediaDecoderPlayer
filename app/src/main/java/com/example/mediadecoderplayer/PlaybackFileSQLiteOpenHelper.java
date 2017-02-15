@@ -1,4 +1,4 @@
-package nat.chung.mediadecoderplayer.SQLCache;
+package com.example.mediadecoderplayer;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -43,7 +43,7 @@ public class PlaybackFileSQLiteOpenHelper extends SQLiteOpenHelper
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion)
 	{
-		Log.d(_TAG, "onUpgrade called, oldVersion=" + oldVersion + ", newVersion=" + newVersion);
+
 	}
 
 	public void execSQL(String sql) throws java.sql.SQLException
@@ -58,6 +58,13 @@ public class PlaybackFileSQLiteOpenHelper extends SQLiteOpenHelper
 		Cursor cursor = db.query(table, columns, selection, selectionArgs, groupBy, having, orderBy);
 		return cursor;
 	}
+
+	public Cursor select2(String table, String [] columns, String selection, String [] selectionArgs, String orderBy, String limit){
+		SQLiteDatabase db = getReadableDatabase();
+		Cursor cursor = db.query(table, columns, selection, selectionArgs, null, null, orderBy, limit);
+		return cursor;
+	}
+
 
 	public long insert(String table, String fields[], String values[])
 	{

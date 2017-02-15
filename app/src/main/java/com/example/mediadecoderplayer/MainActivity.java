@@ -4,6 +4,10 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.pm.PackageManager;
 import android.content.res.AssetFileDescriptor;
+import android.media.AudioFormat;
+import android.media.AudioManager;
+import android.media.AudioTrack;
+import android.media.MediaCodecInfo;
 import android.media.MediaExtractor;
 import android.media.MediaFormat;
 import android.support.v4.app.ActivityCompat;
@@ -17,12 +21,8 @@ import android.widget.SeekBar;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-import nat.chung.mediadecoderplayer.CacheFrame;
-import nat.chung.mediadecoderplayer.DatabaseLoader;
 import nat.chung.mediadecoderplayer.IPlayer;
 import nat.chung.mediadecoderplayer.R;
-import nat.chung.mediadecoderplayer.SQLCache.SQLCache;
-import nat.chung.mediadecoderplayer.SQLCache.SQLCacheDBHelper;
 
 public class MainActivity extends AppCompatActivity implements DatabaseLoader.OnDataUpdateListener, SeekBar.OnSeekBarChangeListener{
 
@@ -39,12 +39,14 @@ public class MainActivity extends AppCompatActivity implements DatabaseLoader.On
         player = new DemoPlayer(this, (TextureView)findViewById(R.id.video_view));
         MainActivity.verifyStoragePermissions(this);
 
+
         setSeekBar();
     }
 
     private void setSeekBar() {
         SeekBar seekBar = (SeekBar) findViewById(R.id.seekBar);
         seekBar.setOnSeekBarChangeListener(this);
+
     }
 
     @Override
@@ -79,7 +81,8 @@ public class MainActivity extends AppCompatActivity implements DatabaseLoader.On
     }
 
     public void onSnapshotClicked(@SuppressWarnings("unused") View unused){
-        player.snapshot("/sdcard/out.png");
+        //player.snapshot("/sdcard/out.png");
+        player.seekTo(0f);
     }
 
 
@@ -136,9 +139,17 @@ public class MainActivity extends AppCompatActivity implements DatabaseLoader.On
     }
 
     private void setDataBaseLoader() {
-        DatabaseLoader loader = new DatabaseLoader(this);
-        loader.setDataUpdateListener(this);
-        loader.getVideoDataFromDatabase(DB_PATH);
+
+        player.setupCache(new DatabaseLoader(this, DB_PATH));
+        MediaFormat format = MediaFormat.createVideoFormat("video/avc", 640, 480);
+        format.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420Flexible);
+
+        try {
+            player.setup("video/avc", format);
+            player.setupPCM(AudioManager.STREAM_MUSIC, 8000, AudioFormat.CHANNEL_CONFIGURATION_MONO, AudioFormat.ENCODING_PCM_16BIT, AudioTrack.MODE_STREAM);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 
@@ -160,17 +171,13 @@ public class MainActivity extends AppCompatActivity implements DatabaseLoader.On
     // seekbar listener
     @Override
     public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-        player.seekTo(i);
+        player.seekTo(0);
     }
 
     @Override
-    public void onStartTrackingTouch(SeekBar seekBar) {
-        player.resume();
-    }
+    public void onStartTrackingTouch(SeekBar seekBar) { }
 
     @Override
-    public void onStopTrackingTouch(SeekBar seekBar) {
-        player.pause();
-    }
+    public void onStopTrackingTouch(SeekBar seekBar) {    }
     //==========
 }

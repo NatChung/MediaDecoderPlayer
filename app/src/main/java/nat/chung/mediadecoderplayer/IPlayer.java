@@ -1,7 +1,6 @@
 package nat.chung.mediadecoderplayer;
 import android.media.MediaFormat;
 import android.view.TextureView;
-import android.widget.FrameLayout;
 
 import java.io.IOException;
 
@@ -23,8 +22,8 @@ public interface IPlayer {
     void setupVideoDecoder(String mineType, MediaFormat format) throws IOException;
     void setupPCM(int streamType, int sampleRateInHz, int channelConfig, int audioFormat, int mode);
     void seekTo(float progress);
-    void pause();
-    void resume();
     void stop();
+    void setupCache(IDataCache cache);
+
     TextureView getTextureView();
 }
