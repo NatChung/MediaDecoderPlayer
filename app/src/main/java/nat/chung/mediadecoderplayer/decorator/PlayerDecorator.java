@@ -45,6 +45,16 @@ public class PlayerDecorator implements IPlayer {
     }
 
     @Override
+    public void resume() {
+        iPlayer.resume();
+    }
+
+    @Override
+    public void pause() {
+        iPlayer.pause();
+    }
+
+    @Override
     public void stop() {
         iPlayer.stop();
     }

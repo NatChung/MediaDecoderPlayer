@@ -31,7 +31,7 @@ public class MainActivity extends AppCompatActivity implements DatabaseLoader.On
     DemoPlayer player = null;
     boolean endOfExtraFile = true;
     private final String DB_PATH = "/sdcard/mediacodec/localplayback1min.db";
-
+    SeekBar seekBar;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -45,7 +45,7 @@ public class MainActivity extends AppCompatActivity implements DatabaseLoader.On
     }
 
     private void setSeekBar() {
-        SeekBar seekBar = (SeekBar) findViewById(R.id.seekBar);
+        seekBar = (SeekBar) findViewById(R.id.seekBar);
         seekBar.setOnSeekBarChangeListener(this);
 
     }
@@ -83,7 +83,16 @@ public class MainActivity extends AppCompatActivity implements DatabaseLoader.On
 
     public void onSnapshotClicked(@SuppressWarnings("unused") View unused){
         //player.snapshot("/sdcard/out.png");
-        player.seekTo(0f);
+//        player.seekTo(0f);
+        seekBar.setProgress(0);
+    }
+
+    public void onVideoResume(View unused){
+        player.resume();
+    }
+
+    public void onVideoPause(View unused){
+        player.pause();
     }
 
 
@@ -177,11 +186,13 @@ public class MainActivity extends AppCompatActivity implements DatabaseLoader.On
     }
 
     @Override
-    public void onStartTrackingTouch(SeekBar seekBar) { }
+    public void onStartTrackingTouch(SeekBar seekBar) {
+        Log.i("ClementDebug", "onStartTrackingTouch: ");
+    }
 
     @Override
     public void onStopTrackingTouch(final SeekBar seekBar) {
-
+        Log.i("ClementDebug", "onStopTrackingTouch: ");
         new Handler().postDelayed(new Runnable(){
             public void run(){
                 player.seekTo((float)seekBar.getProgress() / 100f);
