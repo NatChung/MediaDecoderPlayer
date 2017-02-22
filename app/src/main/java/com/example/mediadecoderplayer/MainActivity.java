@@ -22,6 +22,7 @@ import android.widget.SeekBar;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
+import nat.chung.mediadecoderplayer.G711UCodec;
 import nat.chung.mediadecoderplayer.IPlayer;
 import nat.chung.mediadecoderplayer.R;
 
@@ -159,7 +160,7 @@ public class MainActivity extends AppCompatActivity implements DatabaseLoader.On
 
         try {
             player.setup("video/avc", format);
-            player.setupPCM(AudioManager.STREAM_MUSIC, 8000, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT, AudioTrack.MODE_STREAM);
+            player.setupPCM(AudioManager.STREAM_MUSIC, 8000, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT, AudioTrack.MODE_STREAM, new G711UCodec());
         } catch (IOException e) {
             e.printStackTrace();
         }

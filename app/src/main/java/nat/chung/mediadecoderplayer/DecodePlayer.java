@@ -34,6 +34,7 @@ public class DecodePlayer implements IPlayer, TextureView.SurfaceTextureListener
     private IDataCache dataCache = null;
     private long lastSeekToTimestamp = System.currentTimeMillis();
     private final long SEEKTO_DURATION_MS = 500;
+    private G711UCodec G711 = null;
 
 
     enum PLAY_TASK_STATUS {
@@ -234,7 +235,7 @@ public class DecodePlayer implements IPlayer, TextureView.SurfaceTextureListener
     }
 
 
-    G711UCodec G711 = new G711UCodec();
+
     long firstAudioFramePts = 0;
 
     private static Object audioLock = new Object();
@@ -254,7 +255,7 @@ public class DecodePlayer implements IPlayer, TextureView.SurfaceTextureListener
                     continue;
                 }
 
-                if(dataCache == null){
+                if(G711 == null){
                     audioTrack.write(audioFrame.data, 0, audioFrame.data.length);
                 }else{
                     short[] audioData = new short [audioFrame.data.length ];
@@ -267,14 +268,12 @@ public class DecodePlayer implements IPlayer, TextureView.SurfaceTextureListener
                 }
             }
 
-
             do{
                 sleep(SHORT_SLEEP_TME_IN_MS);
                 long playedTimestamp = audioTrack.getPlaybackHeadPosition() * 1000 / audioTrack.getSampleRate();
                 if(playedTimestamp ==0 || firstAudioFramePts ==0)
                     break;
                 inAudioBufferTime = (audioFrame.timestampMS - firstAudioFramePts) - playedTimestamp;
-                Log.i(TAG,"inAudioBufferTime:"+inAudioBufferTime);
             }while (inAudioBufferTime > 80);
 
 
@@ -347,6 +346,12 @@ public class DecodePlayer implements IPlayer, TextureView.SurfaceTextureListener
     public void setupPCM(int streamType, int sampleRateInHz, int channelConfig, int audioFormat, int mode) {
         initAudioTrack(streamType, sampleRateInHz, channelConfig, audioFormat, mode);
         startAudioTask();
+    }
+
+    @Override
+    public void setupPCM(int streamType, int sampleRateInHz, int channelConfig, int audioFormat, int mode, G711UCodec g711) {
+        G711 = g711;
+        setupPCM(streamType, sampleRateInHz, channelConfig, audioFormat, mode);
     }
 
     @Override

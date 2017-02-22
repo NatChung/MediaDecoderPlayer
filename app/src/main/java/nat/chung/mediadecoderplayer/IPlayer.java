@@ -21,6 +21,7 @@ public interface IPlayer {
     void finishAddAVFrame();
     void setupVideoDecoder(String mineType, MediaFormat format) throws IOException;
     void setupPCM(int streamType, int sampleRateInHz, int channelConfig, int audioFormat, int mode);
+    void setupPCM(int streamType, int sampleRateInHz, int channelConfig, int audioFormat, int mode, G711UCodec g711);
     void seekTo(float progress);
     void resume();
     void pause();

@@ -6,6 +6,7 @@ import android.view.TextureView;
 import java.io.IOException;
 
 import nat.chung.mediadecoderplayer.DecodePlayer;
+import nat.chung.mediadecoderplayer.G711UCodec;
 import nat.chung.mediadecoderplayer.IPlayer;
 import nat.chung.mediadecoderplayer.IDataCache;
 import nat.chung.mediadecoderplayer.decorator.SnapshotDecorator;
@@ -48,6 +49,10 @@ public class DemoPlayer implements DecodePlayer.OnDecodePlayerPlaybackListener {
 
     public void setupPCM(int streamType, int sampleRateInHz, int channelConfig, int audioFormat, int mode){
         player.setupPCM(streamType, sampleRateInHz, channelConfig, audioFormat, mode);
+    }
+
+    public void setupPCM(int streamType, int sampleRateInHz, int channelConfig, int audioFormat, int mode, G711UCodec g711){
+        player.setupPCM(streamType, sampleRateInHz, channelConfig, audioFormat, mode, g711);
     }
 
     public void addAVFrame(IPlayer.AVFRAME_TYPE type, byte[] data, long timestampMS, int isKeyFrame){

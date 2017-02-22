@@ -5,6 +5,7 @@ import android.view.TextureView;
 
 import java.io.IOException;
 
+import nat.chung.mediadecoderplayer.G711UCodec;
 import nat.chung.mediadecoderplayer.IPlayer;
 import nat.chung.mediadecoderplayer.IDataCache;
 
@@ -37,6 +38,11 @@ public class PlayerDecorator implements IPlayer {
     @Override
     public void setupPCM(int streamType, int sampleRateInHz, int channelConfig, int audioFormat, int mode) {
         iPlayer.setupPCM(streamType, sampleRateInHz, channelConfig, audioFormat, mode);
+    }
+
+    @Override
+    public void setupPCM(int streamType, int sampleRateInHz, int channelConfig, int audioFormat, int mode, G711UCodec g711) {
+        iPlayer.setupPCM(streamType, sampleRateInHz, channelConfig, audioFormat, mode, g711);
     }
 
     @Override
