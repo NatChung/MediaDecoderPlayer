@@ -1,7 +1,6 @@
 package com.example.mediadecoderplayer;
 
 import android.content.Context;
-import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
@@ -30,25 +29,20 @@ public class SQLCacheDBHelper extends SQLiteOpenHelper {
     public static SQLiteDatabase getDatabase(Context context) {
         if (database == null || !database.isOpen()) {
             database = new SQLCacheDBHelper(context, DATABASE_NAME, null, VERSION).getWritableDatabase();
+            Log.i(TAG,"Create");
         }
+
+        database.execSQL("DELETE FROM SQLITE_SEQUENCE WHERE NAME = '" + SQLCache.TABLE_AUDIO + "'");
+        database.execSQL("DELETE FROM SQLITE_SEQUENCE WHERE NAME = '" + SQLCache.TABLE_VIDEO + "'");
 
         return database;
     }
 
-    public static Cursor select(String table)
-    {
-        Cursor cursor = database.query(table, null, null, null, null, null, null);
-        return cursor;
-    }
-
     @Override
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {
-        Log.i(TAG,"SQLCacheDBHelper");
+        Log.i(TAG,"onUpgrade");
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + SQLCache.TABLE_VIDEO);
         onCreate(sqLiteDatabase);
     }
 
-    public static void delete(){
-        database.execSQL("DROP TABLE IF EXISTS " + SQLCache.TABLE_VIDEO);
-    }
 }

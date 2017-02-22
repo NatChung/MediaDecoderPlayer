@@ -4,7 +4,6 @@ import android.graphics.SurfaceTexture;
 import android.media.AudioTrack;
 import android.media.MediaCodec;
 import android.media.MediaFormat;
-import android.util.Log;
 import android.view.Surface;
 import android.view.TextureView;
 
@@ -268,20 +267,23 @@ public class DecodePlayer implements IPlayer, TextureView.SurfaceTextureListener
 
         while (playTaskStatus == PLAY_TASK_STATUS.PLAY_TASK_RUNNING || playTaskStatus == PLAY_TASK_STATUS.PLAY_TASK_PAUSED){
             waitForPause();
-            synchronized(this){
-                CacheFrame audioFrame = popAudioFrame();
-                if(audioFrame == null ){
-                    continue;
-                }
 
-                if(dataCache == null){
-                    audioTrack.write(audioFrame.data, 0, audioFrame.data.length);
-                }else{
-                    short[] audioData = new short [audioFrame.data.length ];
-                    G711.decode(audioData, audioFrame.data, audioFrame.data.length , 0);
-                    audioTrack.write(audioData, 0, audioData.length);
-                }
+            CacheFrame audioFrame = null;
+            synchronized(this) {
+                audioFrame = popAudioFrame();
+            }
 
+            if(audioFrame == null ){
+                sleep(SHORT_SLEEP_TME_IN_MS);
+                continue;
+            }
+
+            if(dataCache == null){
+                audioTrack.write(audioFrame.data, 0, audioFrame.data.length);
+            }else{
+                short[] audioData = new short [audioFrame.data.length ];
+                G711.decode(audioData, audioFrame.data, audioFrame.data.length , 0);
+                audioTrack.write(audioData, 0, audioData.length);
             }
 
             sleep(SHORT_SLEEP_TME_IN_MS*9);
@@ -290,7 +292,6 @@ public class DecodePlayer implements IPlayer, TextureView.SurfaceTextureListener
 
     private void waitForPause(){
         while (playTaskStatus== PLAY_TASK_STATUS.PLAY_TASK_PAUSED) {
-            Log.i("ClementDebug", "waitForPause: ");
             sleep(SHORT_SLEEP_TME_IN_MS*5);
         }
     }

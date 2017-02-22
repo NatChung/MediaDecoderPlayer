@@ -114,6 +114,8 @@ public class MainActivity extends AppCompatActivity implements DatabaseLoader.On
                 break;
             }
         }
+
+        player.setupCache(new SQLCache(this));
         player.setup(mine_type, format);
         player.setupPCM(AudioManager.STREAM_MUSIC, 8000, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT, AudioTrack.MODE_STREAM);
 
