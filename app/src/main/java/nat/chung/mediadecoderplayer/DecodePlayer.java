@@ -4,7 +4,6 @@ import android.graphics.SurfaceTexture;
 import android.media.AudioTrack;
 import android.media.MediaCodec;
 import android.media.MediaFormat;
-import android.net.rtp.AudioCodec;
 import android.util.Log;
 import android.view.Surface;
 import android.view.TextureView;
@@ -399,9 +398,7 @@ public class DecodePlayer implements IPlayer, TextureView.SurfaceTextureListener
 
     @Override
     public void pause() {
-        if (playTaskStatus== PLAY_TASK_STATUS.PLAY_TASK_RUNNING
-                && playTaskStatus != PLAY_TASK_STATUS.PLAY_TASK_STOPING
-                && playTaskStatus != PLAY_TASK_STATUS.PLAY_TASK_STOPPED) {
+        if (playTaskStatus== PLAY_TASK_STATUS.PLAY_TASK_RUNNING) {
             playTaskStatus = PLAY_TASK_STATUS.PLAY_TASK_PAUSED;
         }
     }
