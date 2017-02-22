@@ -22,6 +22,8 @@ public interface IPlayer {
     void setupVideoDecoder(String mineType, MediaFormat format) throws IOException;
     void setupPCM(int streamType, int sampleRateInHz, int channelConfig, int audioFormat, int mode);
     void seekTo(float progress);
+    void resume();
+    void pause();
     void stop();
     void setupCache(IDataCache cache);
 

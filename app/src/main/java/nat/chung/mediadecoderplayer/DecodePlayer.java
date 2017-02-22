@@ -45,7 +45,8 @@ public class DecodePlayer implements IPlayer, TextureView.SurfaceTextureListener
     enum PLAY_TASK_STATUS {
         PLAY_TASK_RUNNING,
         PLAY_TASK_STOPING,
-        PLAY_TASK_STOPPED
+        PLAY_TASK_STOPPED,
+        PLAY_TASK_PAUSED
     }
 
     public DecodePlayer(TextureView textureView){
@@ -237,8 +238,9 @@ public class DecodePlayer implements IPlayer, TextureView.SurfaceTextureListener
     private void videoTask()  {
 
         playTaskStatus = PLAY_TASK_STATUS.PLAY_TASK_RUNNING;
-        while (playTaskStatus == PLAY_TASK_STATUS.PLAY_TASK_RUNNING){
+        while (playTaskStatus == PLAY_TASK_STATUS.PLAY_TASK_RUNNING || playTaskStatus == PLAY_TASK_STATUS.PLAY_TASK_PAUSED){
 
+            waitForPause();
             synchronized(this){
                 CacheFrame videoFrame = popVideoFrame();
                 if(videoFrame == null){
@@ -265,8 +267,8 @@ public class DecodePlayer implements IPlayer, TextureView.SurfaceTextureListener
     G711UCodec G711 = new G711UCodec();
     private void audioTask() {
 
-        while (playTaskStatus == PLAY_TASK_STATUS.PLAY_TASK_RUNNING){
-
+        while (playTaskStatus == PLAY_TASK_STATUS.PLAY_TASK_RUNNING || playTaskStatus == PLAY_TASK_STATUS.PLAY_TASK_PAUSED){
+            waitForPause();
             synchronized(this){
                 CacheFrame audioFrame = popAudioFrame();
                 if(audioFrame == null ){
@@ -284,6 +286,13 @@ public class DecodePlayer implements IPlayer, TextureView.SurfaceTextureListener
             }
 
             sleep(SHORT_SLEEP_TME_IN_MS*9);
+        }
+    }
+
+    private void waitForPause(){
+        while (playTaskStatus== PLAY_TASK_STATUS.PLAY_TASK_PAUSED) {
+            Log.i("ClementDebug", "waitForPause: ");
+            sleep(SHORT_SLEEP_TME_IN_MS*5);
         }
     }
 
@@ -380,6 +389,21 @@ public class DecodePlayer implements IPlayer, TextureView.SurfaceTextureListener
                 }
             }
         }).start();
+    }
+
+    @Override
+    public void resume() {
+        if (playTaskStatus == PLAY_TASK_STATUS.PLAY_TASK_PAUSED)
+            playTaskStatus = PLAY_TASK_STATUS.PLAY_TASK_RUNNING;
+    }
+
+    @Override
+    public void pause() {
+        if (playTaskStatus== PLAY_TASK_STATUS.PLAY_TASK_RUNNING
+                && playTaskStatus != PLAY_TASK_STATUS.PLAY_TASK_STOPING
+                && playTaskStatus != PLAY_TASK_STATUS.PLAY_TASK_STOPPED) {
+            playTaskStatus = PLAY_TASK_STATUS.PLAY_TASK_PAUSED;
+        }
     }
 
     @Override

@@ -42,6 +42,10 @@ public class DemoPlayer implements DecodePlayer.OnDecodePlayerPlaybackListener {
         player.setupVideoDecoder(mineType, format);
     }
 
+    public void pause(){ player.pause();}
+
+    public void resume(){ player.resume();}
+
     public void setupPCM(int streamType, int sampleRateInHz, int channelConfig, int audioFormat, int mode){
         player.setupPCM(streamType, sampleRateInHz, channelConfig, audioFormat, mode);
     }
