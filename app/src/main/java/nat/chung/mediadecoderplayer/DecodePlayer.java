@@ -263,30 +263,48 @@ public class DecodePlayer implements IPlayer, TextureView.SurfaceTextureListener
     }
 
     G711UCodec G711 = new G711UCodec();
+    long firstVideoFramePts = 0;
+
+    private static Object audioLock = new Object();
     private void audioTask() {
 
+        long inAudioBufferTime = 0;
+
         while (playTaskStatus == PLAY_TASK_STATUS.PLAY_TASK_RUNNING || playTaskStatus == PLAY_TASK_STATUS.PLAY_TASK_PAUSED){
+
             waitForPause();
 
             CacheFrame audioFrame = null;
-            synchronized(this) {
+            synchronized(audioLock) {
                 audioFrame = popAudioFrame();
+                if(audioFrame == null ){
+                    sleep(SHORT_SLEEP_TME_IN_MS);
+                    continue;
+                }
+
+                if(dataCache == null){
+                    audioTrack.write(audioFrame.data, 0, audioFrame.data.length);
+                }else{
+                    short[] audioData = new short [audioFrame.data.length ];
+                    G711.decode(audioData, audioFrame.data, audioFrame.data.length , 0);
+                    audioTrack.write(audioData, 0, audioData.length);
+                }
+
+                if(firstVideoFramePts == 0){
+                    firstVideoFramePts = audioFrame.timestampMS;
+                }
             }
 
-            if(audioFrame == null ){
+
+            do{
                 sleep(SHORT_SLEEP_TME_IN_MS);
-                continue;
-            }
+                long playedTimestamp = audioTrack.getPlaybackHeadPosition() * 1000 / audioTrack.getSampleRate();
+                if(playedTimestamp ==0 || firstVideoFramePts ==0)
+                    break;
+                inAudioBufferTime = (audioFrame.timestampMS - firstVideoFramePts) - playedTimestamp;
+            }while (inAudioBufferTime > 80);
 
-            if(dataCache == null){
-                audioTrack.write(audioFrame.data, 0, audioFrame.data.length);
-            }else{
-                short[] audioData = new short [audioFrame.data.length ];
-                G711.decode(audioData, audioFrame.data, audioFrame.data.length , 0);
-                audioTrack.write(audioData, 0, audioData.length);
-            }
 
-            sleep(SHORT_SLEEP_TME_IN_MS*9);
         }
     }
 
@@ -373,19 +391,23 @@ public class DecodePlayer implements IPlayer, TextureView.SurfaceTextureListener
         new Thread(new Runnable() {
             public void run() {
                 synchronized (this){
-                    dataCache.seekTo(progress);
+                    synchronized (audioLock){
 
-                    CacheFrame videoFrame = dataCache.popVideoFrame();
-                    videoDecoderEnqueueFrame(videoFrame);
-                    int outputBufferIndex = decoder.dequeueOutputBuffer(bufferInfo, timeoutUs);
-                    if (outputBufferIndex >= 0) {
-                        decoder.releaseOutputBuffer(outputBufferIndex, false);
+                        dataCache.seekTo(progress);
+
+                        CacheFrame videoFrame = dataCache.popVideoFrame();
+                        videoDecoderEnqueueFrame(videoFrame);
+                        int outputBufferIndex = decoder.dequeueOutputBuffer(bufferInfo, timeoutUs);
+                        if (outputBufferIndex >= 0) {
+                            decoder.releaseOutputBuffer(outputBufferIndex, false);
+                        }
+                        resumeTimestamp = videoFrame.timestampMS;
+                        firstVideoFramePts = 0;
+
+                        audioTrack.flush();
+                        audioTrack.stop();
+                        audioTrack.play();
                     }
-                    resumeTimestamp = videoFrame.timestampMS;
-
-                    audioTrack.flush();
-                    audioTrack.stop();
-                    audioTrack.play();
                 }
             }
         }).start();
